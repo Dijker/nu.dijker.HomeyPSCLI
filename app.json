@@ -1,0 +1,12 @@
+{
+    "id": "nu.dijker.HomeyPSCLI",
+    "name": {
+        "en": "PowerShell CLI for Homey"
+    },
+    "version": "0.0.1",
+    "compatibility": "0.x || 1.x",
+    "author": {
+        "name": "Geurt Dijker",
+        "email": "geurt@dijker.nu"
+    }
+}
