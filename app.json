@@ -1,12 +1,18 @@
 {
-    "id": "nu.dijker.HomeyPSCLI",
+    "id": "nu.dijker.homeypscli",
     "name": {
-        "en": "PowerShell CLI for Homey"
+        "en": "PowerShell CLI for Homey", 
+        "nl": "PowerShell CLI voor Homey"		
     },
     "version": "0.0.1",
     "compatibility": "0.x || 1.x",
+	"description": {
+		"en": "Control your Homey from PowerShell on a Windows PC",
+		"nl": "Bestuur je Homey vanuit PowerShell op een Windows PC"
+	},
     "author": {
         "name": "Geurt Dijker",
-        "email": "geurt@dijker.nu"
+        "email": "geurt@dijker.nu",
+		"website": "http://www.dijker.nu"
     }
 }
