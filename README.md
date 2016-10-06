@@ -6,9 +6,12 @@ Download the Powershell Module files from your Homey to manage Homey from your W
 Get your Bearer token from the Browser and your CloudID
 Initialize the PowerShell CLI for Homey
 
-Open your PowerShell or PowerShell ISE, and load the module: 
+Open your PowerShell or PowerShell ISE, and load the module:
+
 *C:\Homey>  Import-Module HomeyPSCLI*
+
 Connect to Homey:
+
 *PS> Connect-Homey -Bearer "Deaf001000bad1000effe000hace000215c001" -CloudID "Deaf010bad10effe0hace021" -ExportPath "C:\Homey\Backup" -WriteConfig*
 
 To export as much info from Homey I could find to the Export path defined with Connect-Homey use the following:
