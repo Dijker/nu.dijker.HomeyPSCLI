@@ -39,9 +39,11 @@ Using the import functions incorrectly can cause serious, system-wide problems t
 
 ## To Do 
 * Make Connect-Homey more robust on imput parameters
-* test and fix Import for Apps ( net.i-dev.betterlogic maybe works, nl.bevlogenheid.countdown isnt working atm)
+* test and fix Import for Apps
+	( net.i-dev.betterlogic maybe works, nl.bevlogenheid.countdown isnt working atm)
 * Create an Auto-Update function for the module.
-* Create new functions: Export-Zones, Export-Devices, Export-InsightsTemplates, Export-InsightsLog, Clear-InsightsLog
+* Create new functions: Export-Zones, Export-Devices, 
+	Export-InsightsTemplates, Export-InsightsLog, Clear-InsightsLog
 * Redraw a icon.svg that looks good when displayed on Homey
 * Connect multiple Homeys 
 
