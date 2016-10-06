@@ -14,5 +14,10 @@
         "name": "Geurt Dijker",
         "email": "geurt@dijker.nu",
 		"website": "http://www.dijker.nu"
-    }
+    },
+	"category": "tools",
+	"images": {
+		"large": "assets/images/large.png",
+		"small": "assets/images/small.png"
+	}
 }
