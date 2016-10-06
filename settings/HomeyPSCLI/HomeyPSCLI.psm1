@@ -1,5 +1,4 @@
 ﻿### Internal 
-
 function Get-ScriptDirectory {
     Split-Path -parent $PSCommandPath
 }
@@ -425,7 +424,7 @@ function Export-HomeyConfig
     $Global:_HomeyGetFlowsApi = "$_HomeysProtocol`://$_HomeysConnectHost/api/manager/flow/flow/" 
     $Global:_HomeysHeaders = @{"Authorization"="Bearer $_HomeysBearer"}
     $Global:_HomeysContentType = "application/json"
-    $Global:_ExportDTSt = "{0:yyyymmddHHmmss}" -f (get-date)
+    $Global:_ExportDTSt = "{0:yyyyMMddHHmmss}" -f (get-date)
     $Global:_HomeyVersion =""
   
     $_FoldersJSON = Get-HomeyFoldersStructure 
@@ -511,15 +510,15 @@ function Import-HomeyFlow
 
 # Base code when loadeing Module 
 [void][System.Reflection.Assembly]::LoadWithPartialName("System.Web.Extensions")
-$ScriptDirectory = Get-ScriptDirectory
-Get-Command -Module HomeyPSCLI | Select-Object -Property Name, Version | FT -HideTableHeaders | Out-File -FilePath $ScriptDirectory\HomeyPSCLI-functions.txt
-$HomeyPSCLIfunctions = Get-Content $ScriptDirectory\HomeyPSCLI-functions.txt -Raw
+# $ScriptDirectory = Get-ScriptDirectory
+# Get-Command -Module HomeyPSCLI | Select-Object -Property Name, Version | FT -HideTableHeaders 
+
 Write-Host " HomeyPSCLI Loaded!..." -ForegroundColor Green 
 Write-Host "" 
 Write-Host " Use Connect-Homey to configure and Test connection:" 
 Write-Host "     Connect-Homey [-IP <string>] [-Bearer <string>] [-ExportPath <string>] [-WriteConfig] " -ForegroundColor Green 
 Write-Host "" 
-Write-Host $HomeyPSCLIfunctions
+Write-Host " use ""Get-Command -Module HomeyPSCLI"" to see the possible commands"
 Write-Host " Have Phun with Homey from your PowerShell !" -ForegroundColor Green 
 
 # Export-ModuleMember -Function Update-Something -Alias *
