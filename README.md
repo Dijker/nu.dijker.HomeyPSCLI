@@ -35,16 +35,14 @@ Using the import functions incorrectly can cause serious, system-wide problems t
 *The Creator of the App and Athom are not responsible!!*
 
 ##Version History:
+0.0.3 First published version (20161009)
 0.0.1 First version created local (20161005)
 
 ## To Do 
-* Make Connect-Homey more robust on imput parameters
+* Make Connect-Homey more robust on input parameters
 * test and fix Import for Apps
 	( net.i-dev.betterlogic maybe works, nl.bevlogenheid.countdown isnt working atm)
-* Create an Auto-Update function for the module.
-* Create new functions: Export-Zones, Export-Devices, 
-	Export-InsightsTemplates, Export-InsightsLog, Clear-InsightsLog
-* Redraw a icon.svg that looks good when displayed on Homey
+* Create new functions: Export-InsightsTemplates, Export-InsightsLog, Clear-InsightsLog
 * Connect multiple Homeys 
 
 ## Licensing
