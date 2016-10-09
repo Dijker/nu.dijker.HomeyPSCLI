@@ -166,6 +166,67 @@ function Get-HomeyFoldersStructure
     return $_FoldersJSON.result
 }
 
+function Get-HomeyZonePath
+{
+    Param( $_ZonesJSON, $_Key)
+    If( $_ZonesJSON.$_Key.parent -eq $False ) {
+        return  $_ZonesJSON.$_Key.name
+    } else { # Next level Folders 
+        return "$(Get-HomeyZonePath $_ZonesJSON "$($_ZonesJSON.$_Key.parent)")\$($_ZonesJSON.$_Key.name)"
+    }
+}
+
+function Export-HomeyZonesStructure
+{
+    $_ExportPathZones =  "$_HomeysExportPath\Zones"
+    $_FoldersWR = Invoke-WebRequest -Uri "$_HomeyGetZonesApi" -Headers $_HomeysHeaders  -ContentType $_HomeysContentType
+    [void][System.Reflection.Assembly]::LoadWithPartialName("System.Web.Extensions")
+    $_ZonesJSON = (New-Object System.Web.Script.Serialization.JavaScriptSerializer).Deserialize($_FoldersWR , [System.Collections.Hashtable]).result
+
+    # Write-Host "-=-=- Folders "
+    $_ZonesJSON.keys | ForEach-Object {
+        $_ZonesRelPath = Get-HomeyZonePath $_ZonesJSON $_             
+        If (!(Test-Path $_ExportPathZones\$_ZonesRelPath)) { New-Item $_ExportPathZones\$_ZonesRelPath -ItemType Directory } 
+    } 
+    $_ZonesJSON | ConvertTo-Json -depth 99 | Out-File -FilePath "$_HomeysExportPath\Zones-v$_HomeyVersion-$_ExportDTSt.json"
+    return $_ZonesJSON
+}
+
+function Get-HomeyZonesStructure
+{
+    $_FoldersWR = Invoke-WebRequest -Uri "$_HomeyGetZonesApi" -Headers $_HomeysHeaders  -ContentType $_HomeysContentType
+    [void][System.Reflection.Assembly]::LoadWithPartialName("System.Web.Extensions")
+    $_ZonesJSON = (New-Object System.Web.Script.Serialization.JavaScriptSerializer).Deserialize($_FoldersWR , [System.Collections.Hashtable]).result
+
+    return $_ZonesJSON
+}
+
+function Export-HomeyDevices
+{
+    # $_HomeyFlowFoldersArray[0]
+    $Global:_ExportDTSt = "{0:yyyyMMddHHmmss}" -f (get-date)
+
+    $_ExportPathDevices =  "$_HomeysExportPath\Zones"
+    $_HomeyGetDeviceApi = "http://$_HomeysIP/api/manager/devices/device"
+    $_DevicesWR = Invoke-WebRequest -Uri "$_HomeyGetDeviceApi" -Headers $_HomeysHeaders  -ContentType $_HomeysContentType
+    $_DevicesJSON = (New-Object System.Web.Script.Serialization.JavaScriptSerializer).Deserialize($_DevicesWR.Content, [System.Collections.Hashtable])
+    $Global:_HomeyVersion = $_FlowsWR.Headers.'X-Homey-Version'
+    # $_FlowsJSON.result | ConvertTo-Json -depth 99 | Out-File -FilePath "$_ExportPathFolders$_FlowFolder\$_FlowsTitle-$_FlowsFolderID-$_HomeyVersion-$_ExportDTSt.json" 
+    # Write-Host "-=-=- Flows "
+    $_HomeyDeviceZones = Get-HomeyZonesStructure
+
+    $_DevicesJSON.result.keys | ForEach-Object {
+        $_DeviceZoneID = $_DevicesJSON.result.$_.zone.id
+        $_DeviceID = $_DevicesJSON.result.$_.id
+        $_DeviceName = $_DevicesJSON.result.$_.name
+        $_DeviceFileName = $_DeviceName 
+        @('\\',':' ) | % {$_DeviceFileName = $_DeviceFileName -replace "$_", "-" }
+        $_DeviceFolder = "\$(Get-HomeyZonePath $_HomeyDeviceZones "$_DeviceZoneID")"
+        $_DevicesJSON.result.$_ | ConvertTo-Json -depth 99 | Out-File -FilePath "$_ExportPathDevices$_DeviceFolder\$_DeviceFileName-$_DeviceID-v$_HomeyVersion-$_ExportDTSt.json" 
+    } 
+    return $_DevicesJSON.result.values
+}
+
 function Get-HomeyFlows
 {
     $_FlowsWR = Invoke-WebRequest -Uri "$_HomeyGetFlowsApi" -Headers $_HomeysHeaders  -ContentType $_HomeysContentType
@@ -249,14 +310,14 @@ function Export-HomeyFlows
         $_FlowArray += ,($_,"$_FlowFolder","$_FlowsTitle")
 
     } 
-    return $_FlowsJSON.result.Values # , $_FlowArray
+    return $_FlowsJSON.result.Values
 }
 
 function Connect-Homey
 <#
 .Synopsis
    Connect-Homey (Homey by Athom http://www.athom.com)
-   Beta 0.0.1
+   Beta 0.3.0
 .DESCRIPTION
    Set IP Address and Bearer for your LOCAL Homey to store in a PowerShell variable Windows computer
 
@@ -334,14 +395,14 @@ function Connect-Homey
     If ($ExportPath -ne "") { $Global:_HomeysExportPath = $ExportPath }
     If ($IP -ne "") { $Global:_HomeysIP = $IP }
     If ($Bearer -ne "") { $Global:_HomeysBearer= $Bearer }
+    If ($CloudID -ne "") { $Global:_HomeysCloudID = "$CloudID" }
 
     $Global:_HomeysProtocol = "https"
 
     $Global:_HomeysHeaders = @{"Authorization"="Bearer $_HomeysBearer"} 
     $Global:_HomeysContentType = "application/json"
-    $Global:_HomeysCloudID = "$CloudID"
-    $Global:_HomeysCloudHostname = "$CloudID.homey.athom.com"
-    $Global:_HomeysCloudLocalHostname = "$CloudID.homeylocal.com"
+    $Global:_HomeysCloudHostname = "$_HomeysCloudID.homey.athom.com"
+    $Global:_HomeysCloudLocalHostname = "$_HomeysCloudID.homeylocal.com"
     If ($CloudID -ne "" ) {    
         $_HomeysResolvedLocalIP =  ([System.Net.Dns]::GetHostAddresses($_HomeysCloudLocalHostname)).IPAddressToString
     }
@@ -353,11 +414,15 @@ function Connect-Homey
         "$_HomeysCloudLocalHostname ICMP Response OK" 
         $Global:_HomeysProtocol = "http"
         $Global:_HomeysConnectHost = $_HomeysCloudLocalHostname
+        $_SystemWR = Invoke-WebRequest -Uri "$_HomeysProtocol`://$_HomeysConnectHost/api/manager/system" -Headers $_HomeysHeaders  -ContentType $_HomeysContentType
+
     } else { 
         If (Test-NetConnection $_HomeysIP -InformationLevel Quiet) {
             "$_HomeysIP ICMP Response OK" 
             $Global:_HomeysProtocol = "http"
             $Global:_HomeysConnectHost = $_HomeysIP
+            $_SystemWR = Invoke-WebRequest -Uri "$_HomeysProtocol`://$_HomeysConnectHost/api/manager/system" -Headers $_HomeysHeaders  -ContentType $_HomeysContentType
+            $Global:_HomeysCloudID = $_SystemWR.Headers.'X-Homey-ID'
         } else {
             $_SystemWR = try {
                 $Global:_HomeysCloudHostname = "$CloudID.homey.athom.com"
@@ -372,16 +437,46 @@ function Connect-Homey
             } 
         }
     } 
-    $Global:_HomeyGetFoldersApi = "$_HomeysProtocol`://$_HomeysConnectHost/api/manager/flow/Folder/" 
-    $Global:_HomeyGetFlowsApi = "$_HomeysProtocol`://$_HomeysConnectHost/api/manager/flow/flow/" 
+    $Global:_HomeyGetZonesApi = "$_HomeysProtocol`://$_HomeysConnectHost/api/manager/Zones/Zone" 
+    $Global:_HomeyGetFoldersApi = "$_HomeysProtocol`://$_HomeysConnectHost/api/manager/flow/Folder" 
+    $Global:_HomeyGetFlowsApi = "$_HomeysProtocol`://$_HomeysConnectHost/api/manager/flow/flow" 
     $Global:_HomeyGetSystemApi = "$_HomeysProtocol`://$_HomeysConnectHost/api/manager/system"
+    $Global:_HomeyMyHomeyPSCLIApp = "$_HomeysProtocol`://$_HomeysConnectHost/app/nu.dijker.homeypscli"
 
-    $_SystemWR = Invoke-WebRequest -Uri "$_HomeyGetSystemApi" -Headers $_HomeysHeaders  -ContentType $_HomeysContentType
+    # $_SystemWR = Invoke-WebRequest -Uri "$_HomeyGetSystemApi" -Headers $_HomeysHeaders  -ContentType $_HomeysContentType
     # $_SystemJSON = (New-Object System.Web.Script.Serialization.JavaScriptSerializer).Deserialize($_SystemWR , [System.Collections.Hashtable])
     IF ( $_SystemWR.StatusCode -eq 200 ) { 
         "$_HomeysConnectHost HTTP Response OK" 
         $Global:_HomeyVersion = $_SystemWR.Headers.'X-Homey-Version'
         "Homey version $Global:_HomeyVersion "
+    }
+
+    $return = Export-HomeySystemSettings -AppUri 'apps/app'
+    if ('nu.dijker.homeypscli' -in $return.keys )  { 
+        # HomeyPSCLI INstalled !!
+        $_HomeysMyAppVersion = $return.'nu.dijker.homeypscli'.version.Split(".")
+        $_HomeysMyAppVersionVal = 0+10*$_HomeysMyAppVersion[2] + 1000*$_HomeysMyAppVersion[1] +100000*$_HomeysMyAppVersion[0]
+        $_CurrentMyAppVersion = (Get-Module HomeyPSCLI).Version
+        $_CurrentMyAppVersionVal = 10*$_CurrentMyAppVersion.Build + 1000*$_CurrentMyAppVersion.Minor + 100000*$_CurrentMyAppVersion.Major
+        If ($_HomeysMyAppVersionVal -gt $_CurrentMyAppVersionVal ) {
+            Write-Host "New HomeyPSCLI version available on Homey!" -ForegroundColor Green
+            Write-Host ".... Downloading upgrade ...." -ForegroundColor Green
+
+
+            # "{0:yyyyMMddHHmmss}" -f (Get-ChildItem C:\Users\gdi.PQRNL\Documents\WindowsPowerShell\Modules\HomeyPSCLI\HomeyPSCLIn.psd1 ).LastWriteTime
+            ('HomeyPSCLI.psd1','HomeyPSCLI.psm1' ) | ForEach-Object  {"$_"
+                iF ( Test-Path "$ScriptDirectory\$_" ) {
+                    $_LastWriteTime = "{0:yyyyMMddHHmmss}" -f (Get-ChildItem "$ScriptDirectory\$_" ).LastWriteTime
+                    Rename-Item -Path "$ScriptDirectory\$_" "$_-$_LastWriteTime"
+                }
+                Invoke-WebRequest "$_HomeyMyHomeyPSCLIApp/settings/HomeyPSCLI/$_" -OutFile "$ScriptDirectory\$_"
+            Write-Host "To activate, Reload module: Import-Module HomeyPSCLI  -Force" -ForegroundColor Yellow
+            }
+        }
+
+    } Else { 
+        Write-Host "Warning: Homey PSCLI not installed on Homey!" -ForegroundColor Yellow
+        Write-Host "pls. install for automatic updates of your HomeyPSCLI Module" -ForegroundColor Yellow
     }
     If ($WriteConfig) {
         "`$Global:_HomeysBearer = ""$_HomeysBearer""" | Out-File -FilePath $ScriptDirectory\Config-HomeyPSCLI.ps1
@@ -395,7 +490,7 @@ function Export-HomeyConfig
 <#
 .Synopsis
    Get Export config from Homey (by Athom http://www.athom.com)
-   Beta 0.0.1
+   Beta 0.3.0
 .DESCRIPTION
    Get Export information from your LOCAL connected Homey to store on a Windows computer
 
@@ -433,6 +528,11 @@ function Export-HomeyConfig
 
     $_FlowsJSON = Export-HomeyFlows 
     $_FlowsJSON | ConvertTo-Json -depth 99 | Out-File -FilePath "$_HomeysExportPath\Flows-v$_HomeyVersion-$_ExportDTSt.json" 
+
+    $_ZonesJSON = Export-HomeyZonesStructure 
+
+    $_DevicesJSON = Export-HomeyDevices
+    $_DevicesJSON | ConvertTo-Json -depth 99 | Out-File -FilePath "$_HomeysExportPath\Devices-v$_HomeyVersion-$_ExportDTSt.json" 
 
     # Maybe Get these dynamic 
     # Test is App enabed ?
@@ -508,10 +608,8 @@ function Import-HomeyFlow
  
 }
 
-# Base code when loadeing Module 
+# Base code when loading Module 
 [void][System.Reflection.Assembly]::LoadWithPartialName("System.Web.Extensions")
-# $ScriptDirectory = Get-ScriptDirectory
-# Get-Command -Module HomeyPSCLI | Select-Object -Property Name, Version | FT -HideTableHeaders 
 
 Write-Host " HomeyPSCLI Loaded!..." -ForegroundColor Green 
 Write-Host "" 

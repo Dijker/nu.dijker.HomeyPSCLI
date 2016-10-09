@@ -1,18 +1,15 @@
 <!doctype html>
 <link rel="stylesheet" href="/manager/webserver/assets/font/fontawesome/fontawesome.css">
-
 <html>
     <head>
-
     </head>
-    <body>
+<body>
 <h1>PowerShell CLI for Homey</h1>
-		<br>Download below the Powershell Module files to manage Homey from your Windows PowerShell Command Line<br>
-		Create a folder "HomeyPSCLI" below the Modules folder and place both files in that folder (something like C:\Users\username\Documents\WindowsPowerShell\Modules)<br>
-		it should look like: <pre class="CodeBlock">...WindowsPowerShell\Modules\HomeyPSCLI\HomeyPSCLI.psm1<br>...WindowsPowerShell\Modules\HomeyPSCLI\HomeyPSCLI.psd1</pre> <br>
-		Get your Bearer token from the Browser and your CloudID here:  <a rel="nofollow" target="_blank" href="/manager/settings/#homey:manager:system">Homey Settings System</a>
-		<h2>Initialize the PowerShell CLI for Homey</h2>
-		Open your PowerShell or PowerShell ISE, and load the module: <br><pre class="CodeBlock">C:\Homey&gt;  Import-Module HomeyPSCLI </pre>Connect to Homey:<br><pre class="CodeBlock">PS&gt; Connect-Homey -Bearer "Deaf001000bad1000effe000hace000215c001" -CloudID "Deaf010bad10effe0hace021" -ExportPath "C:\Homey\Backup" -WriteConfig
+<br>Download below the Powershell Module files to manage Homey from your Windows PowerShell Command Line  <a href="#EasyInstall">Easy Install</a> <br>
+For latest information and more examples open the <a rel="nofollow" target="_blank" href="https://github.com/Dijker/nu.dijker.HomeyPSCLI/wiki">HomeyPSCLI Wiki</a><br>
+Get your Bearer token from the Browser and your CloudID here: <a rel="nofollow" target="_blank" href="/manager/settings/#homey:manager:system">Homey Settings System</a>
+<h2>Initialize the PowerShell CLI for Homey</h2>
+Open your PowerShell or PowerShell ISE, and load the module: <br><pre class="CodeBlock">C:\Homey&gt;  Import-Module HomeyPSCLI </pre>Connect to Homey:<br><pre class="CodeBlock">PS&gt; Connect-Homey -Bearer "Deaf001000bad1000effe000hace000215c001" -CloudID "Deaf010bad10effe0hace021" -ExportPath "C:\Homey\Backup" -WriteConfig
 PS&gt; Get-HomeyPendingUpdate -Verbose -InstallPendingUpdate
 No Updates available...
 Version : 0.10.3
@@ -35,21 +32,39 @@ conditions {}
 actions    {}                                  
 PS&gt; Remove-HomeyFlow  -ID  "a13f6703-a770-4620-8c93-4ea7e824b6b5"
 
-</pre><br><h2>Warning: </h2>This scripts make it possible to import some of the exported information, fe flows and BetterLogic variables. Possibly you break something in Homey when you import across different Homeys,&nbsp;different&nbsp;firmware versions or after importing edited information.&nbsp;<br><br>Using the import functions incorrectly can cause serious, system-wide problems that may require you to factory reset your Homey, restore firmware or even buy a new Homey to correct them.&nbsp;The Creator of the App and Athom&nbsp;cannot guarantee that any problems resulting from the use of these scripts can be solved. Use this tool at your own risk.<br><br>The Creator of the App and Athom are not responsible!!<br>
-<br><br><h2>FAQ:</h2><ol><li>Q: What does this App do? A: Nothing (yet)! It shows this Page to tel you How to user HomeyPSCLI / PowerShell end provides the downloads of the two files.</li><li>Q: So I download the psm1/psd1 files from Github and follow this instructions, will that work? A: Yes that should work!&nbsp;</li><li>Q: Why should I install this app? A: I like to inform you in the notification center to update you scripts next time I update the app. Maybe the next version &nbsp;will support auto updating so you only have to update the scripts yourself once...</li><li>Q: I have an other question.....&nbsp;:smiley:&nbsp; &nbsp;A: See you on the forum:&nbsp;https://forum.athom.com/***&nbsp;<br></li><li>Q: I have found a bug / a feature request! &nbsp;A: See you on GitHub https://github.com/Dijker/nu.dijker.HomeyPSCLI/issues&nbsp;</li></ol><h2>Version History:</h2>0.0.1 First version created local (20161005)<br><br><h2>Download</h2>
+</pre><h2>Warning: </h2>This scripts make it possible to import some of the exported information, fe flows and BetterLogic variables. Possibly you break something in Homey when you import across different Homeys,&nbsp;different&nbsp;firmware versions or after importing edited information.&nbsp;<br><br>Using the import functions incorrectly can cause serious, system-wide problems that may require you to factory reset your Homey, restore firmware or even buy a new Homey to correct them.&nbsp;The Creator of the App and Athom&nbsp;cannot guarantee that any problems resulting from the use of these scripts can be solved. Use this tool at your own risk.<br><br>The Creator of the App and Athom are not responsible!!<br>
+<br><br><h2>FAQ:</h2><ol><li>Q: What does this App do? A: Nothing (yet)! It shows this Page to tel you How to user HomeyPSCLI / PowerShell end provides the downloads of the two files.</li><li>Q: So I download the psm1/psd1 files from Github and follow this instructions, will that work? A: Yes that should work!&nbsp;</li><li>Q: Why should I install this app? A: I like to inform you in the notification center to update you scripts next time I update the app. Maybe the next version &nbsp;will support auto updating so you only have to update the scripts yourself once...</li><li>Q: I have an other question.....&nbsp;:smiley:&nbsp; &nbsp;A: See you on the forum:&nbsp;https://forum.athom.com/***&nbsp;<br></li><li>Q: I have found a bug / a feature request! &nbsp;A: See you on GitHub <a rel="nofollow" target="_blank" href="https://github.com/Dijker/nu.dijker.HomeyPSCLI/issues">HomeyPSCLI Issues</a><br>&nbsp;</li></ol><h2>Version History:</h2>0.0.3 First published version (20161009)<br>0.0.1 First version created local (20161005)<br>
+
+<div ng-show="vm.showExportToggle">
+<a name="EasyInstall"></a> 
+<H2>Easy Module Installation:</H2>
+Replace "YourIPAddress" below with your Homey's IP Address within the quotes. 
+Then Select Everything, copy and past in a PowerShell session.
+<p>
+<textarea rows="10" cols="100">$IP="YourIPAddress" 
+$_MP = $env:PSModulePath.Split(";") | Where-Object {$_ -like  "*users*" } 
+md "$_MP\HomeyPSCLI"
+$_HMP = "$_MP\HomeyPSCLI"
+$_URL = "http://$IP/app/nu.dijker.homeypscli/settings/HomeyPSCLI/HomeyPSCLI" 
+Invoke-WebRequest "$_URL.psd1" -OutFile "$_HMP\HomeyPSCLI.psd1"
+Invoke-WebRequest "$_URL.psm1" -OutFile "$_HMP\HomeyPSCLI.psm1"
+Import-Module HomeyPSCLI 
+
+</textarea>
+</p>
+<b>Manual Module Installation:</b><br />
+Create a folder "HomeyPSCLI" below the Modules folder and place both files in that folder (something like C:\Users\username\Documents\WindowsPowerShell\Modules)<br>
+it should look like: <pre class="CodeBlock">...WindowsPowerShell\Modules\HomeyPSCLI\HomeyPSCLI.psm1<br>...WindowsPowerShell\Modules\HomeyPSCLI\HomeyPSCLI.psd1</pre> 
+<b>Download</b><br>
  <a rel="nofollow" target="_blank" href="/app/nu.dijker.homeypscli/settings/HomeyPSCLI/HomeyPSCLI.psd1">HomeyPSCLI.psd1</a><br>
  <a rel="nofollow" target="_blank" href="/app/nu.dijker.homeypscli/settings/HomeyPSCLI/HomeyPSCLI.psm1">HomeyPSCLI.psm1</a>
-
+<br>
+			</div>
+<br><br>
         <script type="text/javascript">
         function onHomeyReady(){
             Homey.ready()
         }
-
-        function save() {
-            Homey.set('test', document.getElementById('test').value);
-            Homey.set('test2', document.getElementById('test2').value);
-        }
         </script>
-
     </body>
 </html>

@@ -4,7 +4,7 @@
         "en": "PowerShell CLI for Homey", 
         "nl": "PowerShell CLI voor Homey"		
     },
-    "version": "0.0.1",
+    "version": "0.0.3",
     "compatibility": "0.x || 1.x",
 	"description": {
 		"en": "Control your Homey from PowerShell on a Windows PC",
