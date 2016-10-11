@@ -26,7 +26,7 @@ Look at the files and folder structure after running this command.
 *PS> Remove-HomeyFlow  -ID  "767831a5-98b7-4d44-a389-e13f74a9de4a"*
 
 
-For more information and examples view the Settings page after installing, go to the forum (*Link to be inserted*) and create Issues (bug reports, feature requests) on Github (https://github.com/Dijker/nu.dijker.HomeyPSCLI/issues)  
+For more information and examples view the Settings page after installing, go to the forum (*Link to be inserted*) and create Issues (bug reports, feature requests) on Github ( https://github.com/Dijker/nu.dijker.HomeyPSCLI/issues )  
 
 ##Warning:
 
@@ -35,7 +35,14 @@ Using the import functions incorrectly can cause serious, system-wide problems t
 *The Creator of the App and Athom are not responsible!!*
 
 ##Version History:
-0.0.3 First published version (20161009)
+0.0.4 Various fixes version (20161012)
+
+* First Run works without Hanging
+* Illegal chars filterd from flow,folder,zone and devicenames
+* Flow and folder recursive paths work now 
+
+0.0.3 First published version (20161009) (Pending approval)
+
 0.0.1 First version created local (20161005)
 
 ## To Do 
@@ -44,6 +51,8 @@ Using the import functions incorrectly can cause serious, system-wide problems t
 	( net.i-dev.betterlogic maybe works, nl.bevlogenheid.countdown isnt working atm)
 * Create new functions: Export-InsightsTemplates, Export-InsightsLog, Clear-InsightsLog
 * Connect multiple Homeys 
+* Disable auto updating by swich 
+* Action and Condition reordering
 
 ## Licensing
 HomeyPSCLI is free for non-commercial use only. If you wish to use the module and functions/scripts in a company or commercially, you must purchase a site-license by contacting the Author.
