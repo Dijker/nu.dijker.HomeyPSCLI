@@ -35,15 +35,8 @@ Using the import functions incorrectly can cause serious, system-wide problems t
 *The Creator of the App and Athom are not responsible!!*
 
 ##Version History:
-0.0.4 Various fixes version (20161012)
-
-* First Run works without Hanging
-* Illegal chars filterd from flow,folder,zone and devicenames
-* Flow and folder recursive paths work now 
-
-0.0.3 First published version (20161009) (Pending approval)
-
-0.0.1 First version created local (20161005)
+* 0.0.5 (20161109)
+  Online Version History https://github.com/Dijker/nu.dijker.HomeyPSCLI/wiki/Release-Notes
 
 ## To Do 
 * Make Connect-Homey more robust on input parameters
