@@ -2,8 +2,7 @@
 
 function init() {
 	
-	Homey.log("Hello world!");
+	Homey.log("Hello PowerShell!!");
 	
 }
-
 module.exports.init = init;

@@ -1,8 +1,8 @@
 ﻿<#
 .Synopsis
    HomeyPSCLI Module (Homey by Athom http://www.athom.com)
-   Beta 0.5.0 22u21
-   20161107 - Variouse updates 
+   Beta 0.0.6 20170101 22u50
+   - Various updates 
 .DESCRIPTION
    Set IP Address and Bearer for your LOCAL Homey to store in a PowerShell variable Windows computer
    Import-Module HomeyPSCLI [-Force] [-Verbose]
@@ -11,7 +11,6 @@
 .NOTES
    General notes
    Beta beta beta.... 
-
 #>
 
 
@@ -19,7 +18,7 @@ function Connect-Homey
 <#
 .Synopsis
    Connect-Homey 
-   Beta 0.0.5
+   Beta 0.0.6
 .DESCRIPTION
    Set IP Address or HostName and Bearer for your LOCAL Homey to store in a PowerShell variable on your Windows computer
    Optional set Export Path for exports of JSON Config files to your disk
@@ -79,16 +78,8 @@ function Connect-Homey
     )
 
     Write-Verbose "function Connect-Homey" 
-
-    If ($PSBoundParameters['Debug']) {
-        # do Debug stuff
-        Write-Host "Debug = $PSBoundParameters" 
-    }
-
-    If ($PSBoundParameters['Verbose']) {
-        # do verbose stuff
-        Write-Host "Verbose = $PSBoundParameters" 
-    }
+    Write-Debug "Debug = $PSBoundParameters" 
+    Write-Verbose "Verbose = $PSBoundParameters" 
 
     $ScriptDirectory = Get-ScriptDirectory
     # Write-Host "ScriptDirectory : $ScriptDirectory"
@@ -96,7 +87,10 @@ function Connect-Homey
             . $ScriptDirectory\Config-HomeyPSCLI.ps1
         } 
     If ($ExportPath -ne "") { $Global:_HomeysExportPath = $ExportPath }
-    If ($IP -ne "") { $Global:_HomeysIP = $IP }
+    If ($IP -ne "") { 
+        $Global:_HomeysIP = $IP 
+        $Global:_HomeysCloudID = ""
+    }
     If ($Bearer -ne "") { $Global:_HomeysBearer= $Bearer }
     If ($CloudID -ne "") { $Global:_HomeysCloudID = "$CloudID" }
 
@@ -154,6 +148,7 @@ function Connect-Homey
         If ($_HomeysExportPath -ne $null ) { "Homeys Export configured to: $_HomeysExportPath"}
     }
 
+    # !!
     $return = Export-HomeySystemSettings -AppUri 'apps/app'
     if ('nu.dijker.homeypscli' -in $return.keys )  { 
         # HomeyPSCLI INstalled !!
@@ -195,15 +190,26 @@ function Connect-Homey
 function Export-HomeyAppsVar
 {
     param (
-    [string] $AppUri )
+        [Parameter(Mandatory=$true, 
+                ValueFromPipeline=$false,
+                # ValueFromPipelineByPropertyName=$true, 
+                ValueFromRemainingArguments=$False, 
+                Position=0,
+                ParameterSetName='Parameter Set 1')]
+        [ValidateNotNull()]
+        [ValidateNotNullOrEmpty()]
+        [ValidateSet('net.i-dev.betterlogic','nl.bevlogenheid.countdown')]
+        [string] $AppUri
+    )
     [void][System.Reflection.Assembly]::LoadWithPartialName("System.Web.Extensions")
     Write-Verbose "function Export-HomeyAppsVar" 
-
-    $_HomeyUriGetAppVar = "$_HomeysProtocol`://$_HomeysConnectHost/api/manager/settings/app/$AppUri/variables"
-    $_AppWR = Invoke-WebRequest -Uri "$_HomeyUriGetAppVar" -Headers $_HomeysHeaders  -ContentType $_HomeysContentType
-    $_AppJSON = (New-Object System.Web.Script.Serialization.JavaScriptSerializer).Deserialize($_AppWR, [System.Collections.Hashtable])
-    # $Global:_HomeyVersion = $_AppWR.Headers.'X-Homey-Version'
-    return $_AppJSON.result 
+    try {
+        $_HomeyUriGetAppVar = "$_HomeysProtocol`://$_HomeysConnectHost/api/manager/settings/app/$AppUri/variables"
+        $_AppWR = Invoke-WebRequest -Uri "$_HomeyUriGetAppVar" -Headers $_HomeysHeaders  -ContentType $_HomeysContentType
+        $_AppJSON = (New-Object System.Web.Script.Serialization.JavaScriptSerializer).Deserialize($_AppWR, [System.Collections.Hashtable])
+        # $Global:_HomeyVersion = $_AppWR.Headers.'X-Homey-Version'
+        return $_AppJSON.result 
+    } Catch {return $null }
 }
 
 function Export-HomeySystemSettings
@@ -240,8 +246,8 @@ function Import-HomeyAppsVar
         $_AppWR = try {
             Invoke-WebRequest -Uri "$_HomeyUriGetAppVar" -Headers $_HomeysHeaders  -ContentType $_HomeysContentType -ErrorAction Ignore 
         } catch { 
-            $_.Exception.Response
-            Write-Host "Warning: App does not Exists! " -ForegroundColor Yellow
+            # $_.Exception.Response
+            Write-Host "Warning: App not installed! " -ForegroundColor Yellow
         }
         If ($_AppWR.StatusCode -eq 200) {
             $_AllCurrentVars = (New-Object System.Web.Script.Serialization.JavaScriptSerializer).Deserialize($_AppWR.Content, [System.Collections.Hashtable]).result
@@ -296,17 +302,21 @@ function Get-HomeyPendingUpdate
     $_AppWR = Invoke-WebRequest -Uri "$_HomeyUriPendingUpdate" -Headers $_HomeysHeaders  -ContentType $_HomeysContentType
     $_AppJSON = (New-Object System.Web.Script.Serialization.JavaScriptSerializer).Deserialize($_AppWR, [System.Collections.Hashtable])
     $Global:_HomeyVersion = $_AppWR.Headers.'X-Homey-Version'
-    If ($_AppJSON.result.size -gt 1 ) {
+    If ($_AppJSON.result.count -gt 0 ) {
         If ($Verbose) {
-        " Date    : {0}" -f $_AppJSON.result.date
-        " Version : {0}" -f $_AppJSON.result.version
-        " Size    : {0}" -f $_AppJSON.result.size
-        $html = $_AppJSON.result.changelog.en
-        @('br','/li' ) | % {$html = $html -replace "<$_[^>]*?>", "`n" }
-        @('ul','li', '/ul' ) | % {$html = $html -replace "<$_[^>]*?>", "" }
-        @('&amp;' ) | % {$html = $html -replace "$_", "&" }
-        $html = $html -replace "`n`n", "`n"
-        $html
+            $_AppJSON.result | ForEach-Object { 
+                        " Date    : {0}" -f $_.date
+                        " Version : {0}" -f $_.version
+                        " Size    : {0}" -f $_.size
+                        $html = $_.changelog.en
+                        if ( $html.length -eq 0 ) { $html = "<i>This update has no notes"}
+                        @('br','/li' ) | % {$html = $html -replace "<$_[^>]*?>", "`n" }
+                        @('ul','li', '/ul', 'p', '/p') | % {$html = $html -replace "<$_[^>]*?>", "" }
+                        @('&amp;' ) | % {$html = $html -replace "$_", "&" }
+                        $html += "`n" 
+                        $html = $html -replace "`n`n", "`n" 
+                        $html.Split("`n") | ForEach-Object { if ($_ -match '<i>') { $x=$_ ; @('i', '/i') | % { $x = $x -replace "<$_[^>]*?>", "" } ;  Write-Host $x -ForegroundColor Yellow  } else {$_ } }
+            } 
         } Else { 
             return $_AppJSON.result 
         } 
@@ -387,12 +397,12 @@ function Get-HomeyFoldersStructure
     $_ExportPathFolders =  "$_HomeysExportPath\Flows"
     $_FoldersWR = Invoke-WebRequest -Uri "$_HomeyGetFoldersApi" -Headers $_HomeysHeaders  -ContentType $_HomeysContentType
     [void][System.Reflection.Assembly]::LoadWithPartialName("System.Web.Extensions")
-    $_FoldersJSON = (New-Object System.Web.Script.Serialization.JavaScriptSerializer).Deserialize($_FoldersWR , [System.Collections.Hashtable])
+    $_FoldersJSON = (New-Object System.Web.Script.Serialization.JavaScriptSerializer).Deserialize($_FoldersWR , [System.Collections.Hashtable]).result
     $Global:_HomeyVersion = $_FoldersWR.Headers.'X-Homey-Version'
 
-    $VerboseMsg =  "Folders Count: {0}" -f $_FoldersJSON.result.Keys.Count
+    $VerboseMsg =  "Folders Count: {0}" -f $_FoldersJSON.Keys.Count
     Write-Verbose $VerboseMsg 
-    $_FoldersJSON.result.keys | ForEach-Object {
+    $_FoldersJSON.keys | ForEach-Object {
 
         $_FolderRelPath = Get-HomeyFolderPath $_FoldersJSON.result $_ 
         If (!(Test-Path $_ExportPathFolders\$_FolderRelPath)) { $return = New-Item $_ExportPathFolders\$_FolderRelPath -ItemType Directory ; Write-Verbose "Creating Folder: $_FolderRelPath" } 
@@ -506,8 +516,17 @@ function Get-HomeyDevices
 function Debug-HomeyAppVariableUsage
 { 
     param (
-        [string]$ApplicationName, 
-        [switch]$FixMissingVars
+        [Parameter(Mandatory=$true, 
+                   ValueFromPipeline=$false,
+                   # ValueFromPipelineByPropertyName=$true, 
+                   ValueFromRemainingArguments=$False, 
+                   Position=0,
+                   ParameterSetName='Parameter Set 1')]
+        [ValidateNotNull()]
+        [ValidateNotNullOrEmpty()]
+        [ValidateSet('net.i-dev.betterlogic','nl.bevlogenheid.countdown')]
+        [string]$ApplicationName
+        #[switch]$FixMissingVars
     )
     # Set Vars
     # If ($ApplicationName -eq $null) { 
@@ -523,12 +542,16 @@ function Debug-HomeyAppVariableUsage
     $_AppWR = try {
         Invoke-WebRequest -Uri "$_HomeyUriGetAppVar" -Headers $_HomeysHeaders  -ContentType $_HomeysContentType -ErrorAction Ignore 
     } catch { 
-        $_.Exception.Response
-        Write-Host "Warning: App does not Exists! " -ForegroundColor Yellow
+        # $_.Exception.Response
+        Write-Host "Warning: App not installed! " -ForegroundColor Yellow
         break
     }
-        $AppVariables = Export-HomeyAppsVar  "$ApplicationName"
-    $AppVariableNames =  ($AppVariables).name
+    $AppVariables = Export-HomeyAppsVar -AppUri "$ApplicationName"
+
+    If ( $AppVariables -eq $null) { $AppVariableNames = @() } else 
+    {
+        $AppVariableNames = ($AppVariables).name
+    }
 
     #get all devices
     $allDevices = Get-HomeyDevices
@@ -548,8 +571,7 @@ function Debug-HomeyAppVariableUsage
 
     #compare the list of better logic variables to
     #the list of flows containing better logic variables
-    $comparison = Compare-Object -ReferenceObject $AppVariableNames `
-                  -DifferenceObject $UsedVariables
+    $comparison = Compare-Object -ReferenceObject $AppVariableNames -DifferenceObject $UsedVariables
 
     #write output on screen
     Write-Host -ForegroundColor Yellow "BetterLogic variables only existing in App:"
@@ -605,8 +627,6 @@ function Debug-HomeyAppVariableUsage
             $_AppJSON = (New-Object System.Web.Script.Serialization.JavaScriptSerializer).Deserialize($_AppWR, [System.Collections.Hashtable])
             # $Global:_HomeyVersion = $_AppWR.Headers.'X-Homey-Version'
             return $_AppJSON.result 
-
-
         }
         #>
     }
@@ -680,7 +700,7 @@ function Export-HomeyFlows
         $_FlowsFolderID = $_FlowsJSON.result.$_.folder
         $_FlowsID = $_FlowsJSON.result.$_.id
         $_FlowsTitle = Get-ValidFilename $_FlowsJSON.result.$_.title
-        $_FlowFolder = Get-HomeyFolderPath $_HomeyFlowFolders.result $_FlowsFolderID 
+        $_FlowFolder = Get-HomeyFolderPath $_HomeyFlowFolders $_FlowsFolderID 
         
         # Write Only Incremental files
         $_LastFile = Get-ChildItem "$_ExportPathFolders\$_FlowFolder\$_FlowsTitle-$_FlowsID-v*.json"  -Filter  *.json -File -ErrorAction SilentlyContinue | sort -Descending -property LastWriteTime
@@ -694,7 +714,9 @@ function Export-HomeyFlows
             $_FlowsJSON.result.$_ | ConvertTo-Json -depth 99 | Out-File -FilePath "$_ExportPathFolders\$_FlowFolder\$_FlowsTitle-$_FlowsID-v$_HomeyVersion-$_ExportDTSt.json" 
         } 
     } 
-    return $_FlowsJSON.result.Values
+    # 
+    # return $_FlowsJSON.result.Values Removed Values 20161230 22u27
+    return $_FlowsJSON.result
 }
 
 
@@ -744,7 +766,10 @@ function Export-HomeyConfig
         [ValidateScript({$true})]
         #[ValidateRange(0,5)]
         [string]
-        $ExportPath
+        $ExportPath,
+
+        [switch]
+        $FlowBackupZip
         )
     Write-Verbose "function Export-HomeyConfig" 
     If ($ExportPath -ne "") { $_HomeysExportPath = $ExportPath }
@@ -754,13 +779,34 @@ function Export-HomeyConfig
     $Global:_HomeysContentType = "application/json"
     $Global:_ExportDTSt = "{0:yyyyMMddHHmmss}" -f (get-date)
     $Global:_HomeyVersion = ""
+    If (!(Test-Path $_HomeysExportPath)) { $return = New-Item $_HomeysExportPath -ItemType Directory } 
+
+
+    $_ExportPathStats = $_HomeysExportPath
+
+    $return = Get-HomeyStatistics -JSON
+    $_hostname = $return.hostname
+    $_BackupDateZ = $return.date
+    # $return  | ConvertTo-Json -depth 99 | Out-File -FilePath "$_ExportPathAppsVar\Vars-$_Filename-v$_HomeyVersion-$_ExportDTSt.json" 
+
+    # Write Only Incremental files
+    $_LastFile = Get-ChildItem "$_ExportPathStats\Stats-$_hostname-v*.json"  -Filter  *.json -File -ErrorAction SilentlyContinue | sort -Descending -property LastWriteTime
+    If ($_LastFile -ne $null) { 
+        $_NewJSON = $return  | ConvertTo-Json -depth 99 | Out-String
+        $_LastJSONFile = Get-Content -Raw $_LastFile[0]
+        If ($_NewJSON -eq $_LastJSONFile) {$_WriteJSON = $false} else {$_WriteJSON = $true}
+    } else { $_WriteJSON = $true } 
+    If ($_WriteJSON -eq $true ) { 
+        Write-Verbose "Writing Stats - $_Filename" 
+        $return  | ConvertTo-Json -depth 99 | Out-File -FilePath "$_ExportPathStats\Stats-$_hostname-v$_HomeyVersion-$_ExportDTSt.json" 
+    } 
 
     $_FoldersJSON = Get-HomeyFoldersStructure 
     # Export to Folders.json
     # $_FoldersJSON | ConvertTo-Json -depth 99 | Out-File -FilePath "$_HomeysExportPath\FlowFolders-v$_HomeyVersion-$_ExportDTSt.json"
 
     # Write Only Incremental files
-    $_LastFile = Get-ChildItem "$_HomeysExportPath\FlowFolders-v*.json"  -Filter  *.json -File -ErrorAction SilentlyContinue | sort -Descending -property LastWriteTime
+    $_LastFile = Get-ChildItem "$_HomeysExportPath\FlowFolders-$_hostname-v*.json"  -Filter  *.json -File -ErrorAction SilentlyContinue | sort -Descending -property LastWriteTime
     If ($_LastFile -ne $null) { 
         $_NewJSON = $_FoldersJSON | ConvertTo-Json -depth 99 | Out-String
         $_LastJSONFile = Get-Content -Raw $_LastFile[0]
@@ -768,14 +814,14 @@ function Export-HomeyConfig
     } else { $_WriteJSON = $true } 
     If ($_WriteJSON -eq $true ) { 
         Write-Verbose "Writing AllFolders" 
-        $_FoldersJSON | ConvertTo-Json -depth 99 | Out-File -FilePath "$_HomeysExportPath\FlowFolders-v$_HomeyVersion-$_ExportDTSt.json"
-    } 
+        $_FoldersJSON | ConvertTo-Json -depth 99 | Out-File -FilePath "$_HomeysExportPath\FlowFolders-$_hostname-v$_HomeyVersion-$_ExportDTSt.json"
+    }
 
     $_FlowsJSON = Export-HomeyFlows
     # $_FlowsJSON | ConvertTo-Json -depth 99 | Out-File -FilePath "$_HomeysExportPath\Flows-v$_HomeyVersion-$_ExportDTSt.json" 
 
     # Write Only Incremental files
-    $_LastFile = Get-ChildItem "$_HomeysExportPath\Zones-v*.json"  -Filter  *.json -File -ErrorAction SilentlyContinue | sort -Descending -property LastWriteTime
+    $_LastFile = Get-ChildItem "$_HomeysExportPath\Flows-$_hostname-v*.json"  -Filter  *.json -File -ErrorAction SilentlyContinue | sort -Descending -property LastWriteTime
     If ($_LastFile -ne $null) { 
         $_NewJSON = $_FlowsJSON | ConvertTo-Json -depth 99 | Out-String
         $_LastJSONFile = Get-Content -Raw $_LastFile[0]
@@ -783,16 +829,24 @@ function Export-HomeyConfig
     } else { $_WriteJSON = $true } 
     If ($_WriteJSON -eq $true ) { 
         Write-Verbose "Writing All Flows" 
-        $_FlowsJSON | ConvertTo-Json -depth 99 | Out-File -FilePath "$_HomeysExportPath\Flows-v$_HomeyVersion-$_ExportDTSt.json" 
-    } 
+        $_FlowsJSON | ConvertTo-Json -depth 99 | Out-File -FilePath "$_HomeysExportPath\Flows-$_hostname-v$_HomeyVersion-$_ExportDTSt.json" 
+    }
 
+    If ($FlowBackupZip)  { 
+        $_FoldersJSON | ConvertTo-Json -depth 99 -Compress | Out-File -FilePath "$_HomeysExportPath\folders.json" -Encoding ascii 
+        $_FlowsJSON | ConvertTo-Json -depth 99 -Compress | Out-File -FilePath "$_HomeysExportPath\flows.json" -Encoding ascii   
+        # {"backUpDate":"2016-12-30T22:10:01.392Z","backUpVersion":2,"homeyName":"BerliozHomeyRD"}
+        "{`"backUpDate`":`"$_BackupDateZ`",`"backUpVersion`":2,`"homeyName`":`"$_hostname`"}" | Out-File -FilePath "$_HomeysExportPath\backUpInfo.json" -Encoding ascii
+        Compress-Archive "$_HomeysExportPath\flows.json","$_HomeysExportPath\folders.json","$_HomeysExportPath\backUpInfo.json" "$_HomeysExportPath\$_hostname-v$_HomeyVersion-$_ExportDTSt.zip"
+        Remove-Item -Path "$_HomeysExportPath\flows.json","$_HomeysExportPath\folders.json","$_HomeysExportPath\backUpInfo.json"
+    }
     $_ZonesJSON = Export-HomeyZonesStructure 
 
     $_DevicesJSON = Export-HomeyDevices
     # $_DevicesJSON | ConvertTo-Json -depth 99 | Out-File -FilePath "$_HomeysExportPath\Devices-v$_HomeyVersion-$_ExportDTSt.json" 
 
     # Write Only Incremental files
-    $_LastFile = Get-ChildItem "$_HomeysExportPath\Devices-v*.json"  -Filter  *.json -File -ErrorAction SilentlyContinue | sort -Descending -property LastWriteTime
+    $_LastFile = Get-ChildItem "$_HomeysExportPath\Devices-$_hostname-v*.json"  -Filter  *.json -File -ErrorAction SilentlyContinue | sort -Descending -property LastWriteTime
     If ($_LastFile -ne $null) { 
         $_NewJSON = $_DevicesJSON | ConvertTo-Json -depth 99 | Out-String
         $_LastJSONFile = Get-Content -Raw $_LastFile[0]
@@ -800,7 +854,7 @@ function Export-HomeyConfig
     } else { $_WriteJSON = $true } 
     If ($_WriteJSON -eq $true ) { 
         Write-Verbose "Writing All Devices" 
-        $_DevicesJSON | ConvertTo-Json -depth 99 | Out-File -FilePath "$_HomeysExportPath\Devices-v$_HomeyVersion-$_ExportDTSt.json" 
+        $_DevicesJSON | ConvertTo-Json -depth 99 | Out-File -FilePath "$_HomeysExportPath\Devices-$_hostname-v$_HomeyVersion-$_ExportDTSt.json" 
     } 
 
     # Maybe Get these dynamic 
@@ -812,7 +866,7 @@ function Export-HomeyConfig
         # $return  | ConvertTo-Json -depth 99 | Out-File -FilePath "$_ExportPathAppsVar\Vars-$_-v$_HomeyVersion-$_ExportDTSt.json" 
 
         # Write Only Incremental files
-        $_LastFile = Get-ChildItem "$_ExportPathAppsVar\Vars-$_-v*.json"  -Filter  *.json -File -ErrorAction SilentlyContinue | sort -Descending -property LastWriteTime
+        $_LastFile = Get-ChildItem "$_ExportPathAppsVar\Vars-$_hostname-$_-v*.json"  -Filter  *.json -File -ErrorAction SilentlyContinue | sort -Descending -property LastWriteTime
         If ($_LastFile -ne $null) { 
             $_NewJSON = $return  | ConvertTo-Json -depth 99 | Out-String
             $_LastJSONFile = Get-Content -Raw $_LastFile[0]
@@ -820,15 +874,15 @@ function Export-HomeyConfig
         } else { $_WriteJSON = $true } 
         If ($_WriteJSON -eq $true ) { 
             Write-Verbose "Writing Vars - $_" 
-            $return  | ConvertTo-Json -depth 99 | Out-File -FilePath "$_ExportPathAppsVar\Vars-$_-v$_HomeyVersion-$_ExportDTSt.json" 
+            $return  | ConvertTo-Json -depth 99 | Out-File -FilePath "$_ExportPathAppsVar\Vars-$_hostname-$_-v$_HomeyVersion-$_ExportDTSt.json" 
         } 
 
     
         }
 
     # Manager/ System default Homeys settings 
-    @('apps/app', 'speech-input/settings', 'speech-output/settings', 'speech-output/voice', 'ledring/brightness', 'ledring/screensaver' ,
-       'speaker/settings', 'geolocation' ,  'zwave/state' , 'users/user', 'updates/settings', 'system' , 'system/memory', 'system/storage') | ForEach-Object {
+    @('apps/app', 'speech-input/settings', 'speech-output/settings', 'speech-output/voice', 'ledring/brightness', 'ledring/screensaver', 'flow/token', 
+       'speaker/settings', 'geolocation', 'notifications/notification', 'notifications/origin',  'zwave/state' , 'users/user', 'updates/settings', 'updates/update', 'system' , 'system/memory', 'system/storage') | ForEach-Object {
         $_ExportPathAppsVar =  "$_HomeysExportPath\Settings\$_"
         If (!(Test-Path $_ExportPathAppsVar)) { $return = New-Item $_ExportPathAppsVar -ItemType Directory } 
         $return = Export-HomeySystemSettings -AppUri $_
@@ -836,7 +890,7 @@ function Export-HomeyConfig
         # $return  | ConvertTo-Json -depth 99 | Out-File -FilePath "$_ExportPathAppsVar\Vars-$_Filename-v$_HomeyVersion-$_ExportDTSt.json" 
 
         # Write Only Incremental files
-        $_LastFile = Get-ChildItem "$_ExportPathAppsVar\Vars-$_Filename-v*.json"  -Filter  *.json -File -ErrorAction SilentlyContinue | sort -Descending -property LastWriteTime
+        $_LastFile = Get-ChildItem "$_ExportPathAppsVar\Vars-$_hostname-$_Filename-v*.json"  -Filter  *.json -File -ErrorAction SilentlyContinue | sort -Descending -property LastWriteTime
         If ($_LastFile -ne $null) { 
             $_NewJSON = $return  | ConvertTo-Json -depth 99 | Out-String
             $_LastJSONFile = Get-Content -Raw $_LastFile[0]
@@ -844,10 +898,116 @@ function Export-HomeyConfig
         } else { $_WriteJSON = $true } 
         If ($_WriteJSON -eq $true ) { 
             Write-Verbose "Writing Vars - $_Filename" 
-            $return  | ConvertTo-Json -depth 99 | Out-File -FilePath "$_ExportPathAppsVar\Vars-$_Filename-v$_HomeyVersion-$_ExportDTSt.json" 
+            $return  | ConvertTo-Json -depth 99 | Out-File -FilePath "$_ExportPathAppsVar\Vars-$_hostname-$_Filename-v$_HomeyVersion-$_ExportDTSt.json" 
         } 
     }
+
 }
+
+function Get-HomeyStatistics {
+    [cmdletbinding(DefaultParameterSetName=’Object’)]
+    Param (
+        # Param1 help description
+        [Parameter(ParameterSetName='JSON')]
+        # [AllowNull()]
+        # [AllowEmptyCollection()]
+        # [AllowEmptyString()]
+        [ValidateNotNull()]
+        [ValidateNotNullOrEmpty()]
+        # [ValidateScript({$true})]
+        #[ValidateRange(0,5)]
+        [switch]
+        $JSON,
+
+        # Param2 help description
+        [Parameter(ParameterSetName='Object')]
+        # [AllowNull()]
+        # [AllowEmptyCollection()]
+        # [AllowEmptyString()]
+        [ValidateNotNull()]
+        [ValidateNotNullOrEmpty()]
+        # [ValidateScript({$true})]
+        #[ValidateRange(0,5)]
+        [switch]
+        $Object
+    ) 
+    If (!$JSON -and !$Object) { $Object = $true }
+
+    $return = Export-HomeySystemSettings -AppUri 'system'
+    $apps = Export-HomeySystemSettings -AppUri 'apps/app'
+    $return.Apps = $apps.Keys.count
+    $return.AppsDisabled = ($apps.Values | Where-Object {$_.enabled -eq $false}).count 
+    $devices =  Get-HomeyDevices 
+    $return.Devices = $devices.count
+    $return.DevicesOffline = ($devices | Where-Object {$_.online -eq $false }).count
+    $return.Zones = (Get-HomeyZonesStructure).values.count
+    $flows = Get-HomeyFlows
+    $return.Flows = $flows.count
+    $return.FlowsBroken = ( $flows | Where-Object { $_.broken -eq $True} ).count
+    $return.Folders = (Get-HomeyFoldersStructure).values.count
+    $tokens = Export-HomeySystemSettings -AppUri 'flow/token'
+    $return.Tokens = $tokens.count
+    $return.DeviceTokens = ($Tokens | Where-Object { $_.uriObj.type -eq 'device'}).count
+    $return.AppTokens = ($Tokens | Where-Object { $_.uriObj.type -eq 'app'}).count
+
+    If ($Object)  { 
+<#      $myObject = @(New-Object System.Object)
+        $return.keys | ForEach-Object  { $V = $return.$_ | ConvertTo-Json -Depth 99 ; $myObject[0] | Add-Member -type NoteProperty -name "$_" -Value "$V" } 
+        return $myObject  #>
+        return $return | ConvertTo-Json|  ConvertFrom-Json 
+    } 
+    If ($JSON)  { return $return } 
+} 
+
+
+Function Get-HomeyTokens {
+
+    [cmdletbinding(DefaultParameterSetName=’Object’)]
+    Param (
+        # Param1 help description
+        [Parameter(ParameterSetName='JSON')]
+        # [AllowNull()]
+        # [AllowEmptyCollection()]
+        # [AllowEmptyString()]
+        [ValidateNotNull()]
+        [ValidateNotNullOrEmpty()]
+        # [ValidateScript({$true})]
+        #[ValidateRange(0,5)]
+        [switch]
+        $JSON,
+
+        # Param2 help description
+        [Parameter(ParameterSetName='Object')]
+        # [AllowNull()]
+        # [AllowEmptyCollection()]
+        # [AllowEmptyString()]
+        [ValidateNotNull()]
+        [ValidateNotNullOrEmpty()]
+        # [ValidateScript({$true})]
+        #[ValidateRange(0,5)]
+        [switch]
+        $Object
+    ) 
+    If (!$JSON -and !$Object) { $Object = $true }
+    
+    $return = Export-HomeySystemSettings -AppUri 'flow/token' 
+
+    If ($Object)  { 
+<#      $myObject = @()
+        $return | ForEach-Object { 
+            $Val = $_ 
+            $myObject1 = @(New-Object System.Object)
+            $Val.keys | ForEach-Object { $V = $Val.$_ | ConvertTo-Json -Depth 99 ; $myObject1 | Add-Member -type NoteProperty -name "$_" -Value "$V" } 
+            $myObject += $myObject1
+        } 
+        # $return[0].keys | ForEach-Object  { $V = $return[0].$_ | ConvertTo-Json -Depth 99 ; $myObject | Add-Member -type NoteProperty -name "$_" -Value "$V" } 
+        return $myObject #>
+        return $return | ConvertTo-Json|  ConvertFrom-Json 
+    } 
+    If ($JSON)  { return $return } 
+}
+
+
 
 function Import-HomeyFlow 
 {

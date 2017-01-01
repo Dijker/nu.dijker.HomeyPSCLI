@@ -3,7 +3,32 @@
 ## Install
 Download the Powershell Module files from your Homey to manage Homey from your Windows PowerShell Command Line.
 
-Appstore info in the APPSTORE.md View here: https://apps.athom.com/app/nu.dijker.homeypscli
+Get your Bearer token from the Browser and your CloudID
+Initialize the PowerShell CLI for Homey
+
+Open your PowerShell or PowerShell ISE, and load the module:
+
+*C:\Homey>  Import-Module HomeyPSCLI*
+
+Connect to Homey:
+
+*PS> Connect-Homey -Bearer "Deaf001000bad1000effe000hace000215c001" -ExportPath "C:\Homey\Backup" -WriteConfig*
+
+To export as much info from Homey I could find to the Export path defined with Connect-Homey use the following:
+*PS> Export-HomeyConfig*
+
+Look at the files and folder structure after running this command.
+
+*PS> Get-HomeyFlows  | Where-Object { $_.title -eq "StopMic" }*
+
+*PS> Get-HomeyFlows  | Where-Object { $_.broken -eq $true } | ConvertTo-Json |  ConvertFrom-Json | FT -Property id, title, broken*
+
+*PS> Get-HomeyStatistics
+
+*PS> Get-HomeyTokens
+
+*PS> Remove-HomeyFlow  -ID  "767831a5-98b7-4d44-a389-e13f74a9de4a"*
+
 
 For more information and examples view the Settings page after installing, go to the forum (*Link to be inserted*) and create Issues (bug reports, feature requests) on Github ( https://github.com/Dijker/nu.dijker.HomeyPSCLI/issues )  
 
@@ -26,7 +51,7 @@ Using the import functions incorrectly can cause serious, system-wide problems t
 	( net.i-dev.betterlogic maybe works, nl.bevlogenheid.countdown isnt working atm)
 * Create new functions: Export-InsightsTemplates, Export-InsightsLog, Clear-InsightsLog
 * Connect multiple Homeys 
-* Disable auto updating by swich 
+* Disable auto updating by switch 
 * Action and Condition reordering
 
 ## Licensing
