@@ -14,7 +14,7 @@ Using the import functions incorrectly can cause serious, system-wide problems t
 *The Creator of the App and Athom are not responsible!!*
 
 ##Version History:
-* 0.0.8 (20170701)
+* 0.0.9 (20170701)
 
   Various fixes
 
@@ -23,7 +23,7 @@ Using the import functions incorrectly can cause serious, system-wide problems t
   Added new exports for Homey v1.1.x firmware
 
   Added new commandlets Get-HomeyStatistics, Get-HomeyTokens  
-  
+
   Online Version History https://github.com/Dijker/nu.dijker.HomeyPSCLI/wiki/Release-Notes
 
 ## To Do
