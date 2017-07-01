@@ -882,7 +882,8 @@ function Export-HomeyConfig
 
     # Manager/ System default Homeys settings
     @('apps/app', 'speech-input/settings', 'speech-output/settings', 'speech-output/voice', 'ledring/brightness', 'ledring/screensaver', 'flow/token',
-       'speaker/settings', 'geolocation', 'notifications/notification', 'notifications/origin',  'zwave/state' , 'users/user', 'updates/settings', 'updates/update', 'system' , 'system/memory', 'system/storage') | ForEach-Object {
+       'speaker/settings', 'geolocation', 'notifications/notification', 'notifications/origin',  'zwave/state' , 'users/user', 'updates/settings',
+	   'updates/update', 'system' , 'system/memory', 'system/storage') | ForEach-Object {
         $_ExportPathAppsVar =  "$_HomeysExportPath\Settings\$_"
         If (!(Test-Path $_ExportPathAppsVar)) { $return = New-Item $_ExportPathAppsVar -ItemType Directory }
         $return = Export-HomeySystemSettings -AppUri $_
@@ -899,6 +900,47 @@ function Export-HomeyConfig
         If ($_WriteJSON -eq $true ) {
             Write-Verbose "Writing Vars - $_Filename"
             $return  | ConvertTo-Json -depth 99 | Out-File -FilePath "$_ExportPathAppsVar\Vars-$_hostname-$_Filename-v$_HomeyVersion-$_ExportDTSt.json"
+        }
+    }
+
+    @('media/playlist') | ForEach-Object {
+        $_ExportPathAppsVar =  "$_HomeysExportPath\Media"
+        If (!(Test-Path $_ExportPathAppsVar)) { $return = New-Item $_ExportPathAppsVar -ItemType Directory } 
+        $return = Export-HomeySystemSettings -AppUri $_
+        $_Filename = Get-ValidFilename $_
+        # $return  | ConvertTo-Json -depth 99 | Out-File -FilePath "$_ExportPathAppsVar\Vars-$_Filename-v$_HomeyVersion-$_ExportDTSt.json" 
+
+        # Write Only Incremental files
+        $_LastFile = Get-ChildItem "$_ExportPathAppsVar\PlayLists-$_hostname-$_Filename-v*.json"  -Filter  *.json -File -ErrorAction SilentlyContinue | sort -Descending -property LastWriteTime
+        If ($_LastFile -ne $null) { 
+            $_NewJSON = $return  | ConvertTo-Json -depth 99 | Out-String
+            $_LastJSONFile = Get-Content -Raw $_LastFile[0]
+            If ($_NewJSON -eq $_LastJSONFile) {$_WriteJSON = $false} else {$_WriteJSON = $true}
+        } else { $_WriteJSON = $true } 
+        If ($_WriteJSON -eq $true ) { 
+            Write-Verbose "Writing PlayList - $_Filename" 
+            $return  | ConvertTo-Json -depth 99 | Out-File -FilePath "$_ExportPathAppsVar\PlayLists-$_hostname-$_Filename-v$_HomeyVersion-$_ExportDTSt.json" 
+        }  
+        $_PlayLists = $return        
+    }
+    $_PlayLists | ForEach-Object {
+        $_ExportPathAppsVar =  "$_HomeysExportPath\Media\PlayLists"
+        If (!(Test-Path $_ExportPathAppsVar)) { $return = New-Item $_ExportPathAppsVar -ItemType Directory } 
+        $return = Export-HomeySystemSettings -AppUri "media/playlist/"+ $_.id
+        $_Filename1 = $_.title+" - "+$_.id
+        $_Filename = Get-ValidFilename $_Filename1
+        # $return  | ConvertTo-Json -depth 99 | Out-File -FilePath "$_ExportPathAppsVar\Vars-$_Filename-v$_HomeyVersion-$_ExportDTSt.json" 
+
+        # Write Only Incremental files
+        $_LastFile = Get-ChildItem "$_ExportPathAppsVar\PlayList-$_hostname-$_Filename-v*.json"  -Filter  *.json -File -ErrorAction SilentlyContinue | sort -Descending -property LastWriteTime
+        If ($_LastFile -ne $null) { 
+            $_NewJSON = $return  | ConvertTo-Json -depth 99 | Out-String
+            $_LastJSONFile = Get-Content -Raw $_LastFile[0]
+            If ($_NewJSON -eq $_LastJSONFile) {$_WriteJSON = $false} else {$_WriteJSON = $true}
+        } else { $_WriteJSON = $true } 
+        If ($_WriteJSON -eq $true ) { 
+            Write-Verbose "Writing PlayList - $_Filename" 
+            $return  | ConvertTo-Json -depth 99 | Out-File -FilePath "$_ExportPathAppsVar\PlayList-$_hostname-$_Filename-v$_HomeyVersion-$_ExportDTSt.json" 
         }
     }
 
