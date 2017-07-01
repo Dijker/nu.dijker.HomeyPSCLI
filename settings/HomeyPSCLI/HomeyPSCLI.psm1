@@ -1,7 +1,7 @@
 ﻿<#
 .Synopsis
    HomeyPSCLI Module (Homey by Athom http://www.athom.com)
-   Beta 0.0.9 20170701
+   Beta 0.0.10 20170701
    - Various updates
 .DESCRIPTION
    Set IP Address and Bearer for your LOCAL Homey to store in a PowerShell variable Windows computer
@@ -18,7 +18,7 @@ function Connect-Homey
 <#
 .Synopsis
    Connect-Homey
-   Beta 0.0.9
+   Beta 0.0.10
 .DESCRIPTION
    Set IP Address or HostName and Bearer for your LOCAL Homey to store in a PowerShell variable on your Windows computer
    Optional set Export Path for exports of JSON Config files to your disk
@@ -724,7 +724,7 @@ function Export-HomeyConfig
 <#
 .Synopsis
    Get Export config from Homey (by Athom http://www.athom.com)
-   Beta 0.0.9
+   Beta 0.0.10
 .DESCRIPTION
    Get Export information from your LOCAL connected Homey to store on a Windows computer
 

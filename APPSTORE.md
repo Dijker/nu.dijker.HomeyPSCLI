@@ -39,7 +39,7 @@ Using the import functions incorrectly can cause serious, system-wide problems t
 *The Creator of the App and Athom are not responsible!!*
 
 ##Version History:
-* 0.0.9 (20170701)
+* 0.0.10 (20170701)
 
   Various fixes
 
