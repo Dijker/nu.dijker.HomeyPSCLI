@@ -19,59 +19,66 @@ Added an App's userdata folder to Homey's webserver
 Fixed a bug where Flow tags of a trigger could be null
 Various improvements
 
- Please wait fetching and starting update, do not turn off the power! 
+ Please wait fetching and starting update, do not turn off the power!
 
 </pre>To export as much info from Homey I could find to the Export path defined with Connect-Homey use the following:<br><pre class="CodeBlock">PS&gt; Export-HomeyConfig</pre>Look at the files and folder structure after running this command.<br><br><h2>Some Examples:&nbsp;</h2><pre class="CodeBlock">PS&gt; Get-HomeyFlows  | Where-Object { $_.title -eq "StopMic" }
 PS&gt; Get-HomeyFlows &nbsp;| Where-Object { $_.broken -eq $true } | ConvertTo-Json | &nbsp;ConvertFrom-Json | FT -Property id, title, broken
 PS&gt;  Remove-HomeyFlow  -ID  "767831a5-98b7-4d44-a389-e13f74a9de4a"
 
-PS C:\Homey&gt; Get-HomeyFlows  | Where-Object { $_.title -eq "New Flow" }  
+PS C:\Homey&gt; Get-HomeyFlows  | Where-Object { $_.title -eq "New Flow" }
 
-Key        Value                               
----        -----                               
+Key        Value
+---        -----
 id         a13f6703-a770-4620-8c93-4ea7e824b6b5
-title      New Flow                            
-enabled    True                                
-folder     False                               
-order      11                                  
-broken     False                               
-trigger    False                               
-conditions {}                                  
-actions    {}                                  
+title      New Flow
+enabled    True
+folder     False
+order      11
+broken     False
+trigger    False
+conditions {}
+actions    {}
 PS&gt; Remove-HomeyFlow  -ID  "a13f6703-a770-4620-8c93-4ea7e824b6b5"
 
 </pre><h2>Warning: </h2>This scripts make it possible to import some of the exported information, fe flows and BetterLogic variables. Possibly you break something in Homey when you import across different Homeys,&nbsp;different&nbsp;firmware versions or after importing edited information.&nbsp;<br><br>Using the import functions incorrectly can cause serious, system-wide problems that may require you to factory reset your Homey, restore firmware or even buy a new Homey to correct them.&nbsp;The Creator of the App and Athom&nbsp;cannot guarantee that any problems resulting from the use of these scripts can be solved. Use this tool at your own risk.<br><br>The Creator of the App and Athom are not responsible!!<br>
-<br><br><h2>FAQ:</h2><ol><li>Q: What does this App do? A: Nothing (yet)! It shows this Page to tel you How to user HomeyPSCLI / PowerShell end provides the downloads of the two files.</li><li>Q: So I download the psm1/psd1 files from Github and follow this instructions, will that work? A: Yes that should work!&nbsp;</li><li>Q: Why should I install this app? A: I like to inform you in the notification center to update you scripts next time I update the app. Maybe the next version &nbsp;will support auto updating so you only have to update the scripts yourself once...</li><li>Q: I have an other question.....&nbsp;:smiley:&nbsp; &nbsp;A: See you on the&nbsp;<a rel="nofollow" target="_blank" href="https://forum.athom.com/discussion/2086">Athom Forum HomeyPSCLI tread</a><br>&nbsp;<br></li><li>Q: I have found a bug / a feature request! &nbsp;A: See you on GitHub <a rel="nofollow" target="_blank" href="https://github.com/Dijker/nu.dijker.HomeyPSCLI/issues">HomeyPSCLI Issues</a><br>&nbsp;</li></ol><h2>Version History:</h2>0.0.6 (20170101)<br><a rel="nofollow" target="_blank" href="https://github.com/Dijker/nu.dijker.HomeyPSCLI/wiki/Release-Notes">Online Version History</a><br>
+<br><br><h2>FAQ:</h2><ol><li>Q: What does this App do? A: Nothing (yet)! It shows this Page to tel you How to user HomeyPSCLI / PowerShell end provides the downloads of the two files.</li><li>Q: So I download the psm1/psd1 files from Github and follow this instructions, will that work? A: Yes that should work!&nbsp;</li><li>Q: Why should I install this app? A: I like to inform you in the notification center to update you scripts next time I update the app. Maybe the next version &nbsp;will support auto updating so you only have to update the scripts yourself once...</li><li>Q: I have an other question.....&nbsp;:smiley:&nbsp; &nbsp;A: See you on the&nbsp;<a rel="nofollow" target="_blank" href="https://forum.athom.com/discussion/2086">Athom Forum HomeyPSCLI tread</a><br>&nbsp;<br></li><li>Q: I have found a bug / a feature request! &nbsp;A: See you on GitHub <a rel="nofollow" target="_blank" href="https://github.com/Dijker/nu.dijker.HomeyPSCLI/issues">HomeyPSCLI Issues</a><br>&nbsp;</li></ol><h2>Version History:</h2>0.0.8 (20170701)<br><a rel="nofollow" target="_blank" href="https://github.com/Dijker/nu.dijker.HomeyPSCLI/wiki/Release-Notes">Online Version History</a><br>
 
-<div ng-show="vm.showExportToggle">
-<a name="EasyInstall"></a> 
+<a name="EasyInstall"></a>
 <H2>Easy Module Installation:</H2>
-Replace "YourIPAddress" below with your Homey's IP Address within the quotes. 
+Replace "YourIPAddress" below with your Homey's IP Address within the quotes.
 Then Select Everything, copy and past in a PowerShell session.
 <p>
-<textarea rows="10" cols="100">$IP="YourIPAddress" 
-$_MP = $env:PSModulePath.Split(";") | Where-Object {$_ -like  "*users*" } 
+<textarea rows="10" cols="100">$IP="YourIPAddress"
+$_MP = $env:PSModulePath.Split(";") | Where-Object {$_ -like  "*users*" }
 md "$_MP\HomeyPSCLI"
 $_HMP = "$_MP\HomeyPSCLI"
-$_URL = "http://$IP/app/nu.dijker.homeypscli/settings/HomeyPSCLI/HomeyPSCLI" 
+$_URL = "http://$IP/app/nu.dijker.homeypscli/settings/HomeyPSCLI/HomeyPSCLI"
 Invoke-WebRequest "$_URL.psd1" -OutFile "$_HMP\HomeyPSCLI.psd1"
 Invoke-WebRequest "$_URL.psm1" -OutFile "$_HMP\HomeyPSCLI.psm1"
-Import-Module HomeyPSCLI 
+Import-Module HomeyPSCLI
 
 </textarea>
 </p>
 <b>Manual Module Installation:</b><br />
 Create a folder "HomeyPSCLI" below the Modules folder and place both files in that folder (something like C:\Users\username\Documents\WindowsPowerShell\Modules)<br>
-it should look like: <pre class="CodeBlock">...WindowsPowerShell\Modules\HomeyPSCLI\HomeyPSCLI.psm1<br>...WindowsPowerShell\Modules\HomeyPSCLI\HomeyPSCLI.psd1</pre> 
+it should look like: <pre class="CodeBlock">...WindowsPowerShell\Modules\HomeyPSCLI\HomeyPSCLI.psm1<br>...WindowsPowerShell\Modules\HomeyPSCLI\HomeyPSCLI.psd1</pre>
 <b>Download</b><br>
  <a rel="nofollow" target="_blank" href="/app/nu.dijker.homeypscli/settings/HomeyPSCLI/HomeyPSCLI.psd1">HomeyPSCLI.psd1</a><br>
  <a rel="nofollow" target="_blank" href="/app/nu.dijker.homeypscli/settings/HomeyPSCLI/HomeyPSCLI.psm1">HomeyPSCLI.psm1</a>
+<br><br><br>
+I am a professional, I like my browser and I know what I do:
+      <a href="javascript:window.location.reload(true)" onClick="SetCookie('homey_suppressbrowserwarning','1',999)"><button type="button" name="accept" class="btn btn-success">Give me the Cookie - OM NOM NOM</button>
 <br>
-			</div>
-<br><br>
         <script type="text/javascript">
         function onHomeyReady(){
             Homey.ready()
+        }
+        function SetCookie(c_name,value,expiredays) {
+          var exdate=new Date()
+          exdate.setDate(exdate.getDate()+expiredays)
+          document.cookie=c_name+ "=" +escape(value)+
+          ((expiredays==null) ? "" : ";expires="+exdate.toGMTString())+"; path=/"
+          location.reload()
         }
         </script>
     </body>

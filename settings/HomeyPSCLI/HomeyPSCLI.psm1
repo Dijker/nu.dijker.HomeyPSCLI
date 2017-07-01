@@ -1,7 +1,7 @@
 ﻿<#
 .Synopsis
    HomeyPSCLI Module (Homey by Athom http://www.athom.com)
-   Beta 0.0.6 20170101 22u50
+   Beta 0.0.8 20170701
    - Various updates 
 .DESCRIPTION
    Set IP Address and Bearer for your LOCAL Homey to store in a PowerShell variable Windows computer
@@ -18,7 +18,7 @@ function Connect-Homey
 <#
 .Synopsis
    Connect-Homey 
-   Beta 0.0.6
+   Beta 0.0.8
 .DESCRIPTION
    Set IP Address or HostName and Bearer for your LOCAL Homey to store in a PowerShell variable on your Windows computer
    Optional set Export Path for exports of JSON Config files to your disk
@@ -404,7 +404,7 @@ function Get-HomeyFoldersStructure
     Write-Verbose $VerboseMsg 
     $_FoldersJSON.keys | ForEach-Object {
 
-        $_FolderRelPath = Get-HomeyFolderPath $_FoldersJSON.result $_ 
+        $_FolderRelPath = Get-HomeyFolderPath $_FoldersJSON $_ 
         If (!(Test-Path $_ExportPathFolders\$_FolderRelPath)) { $return = New-Item $_ExportPathFolders\$_FolderRelPath -ItemType Directory ; Write-Verbose "Creating Folder: $_FolderRelPath" } 
     } 
     return $_FoldersJSON
@@ -724,7 +724,7 @@ function Export-HomeyConfig
 <#
 .Synopsis
    Get Export config from Homey (by Athom http://www.athom.com)
-   Beta 0.0.5
+   Beta 0.0.8
 .DESCRIPTION
    Get Export information from your LOCAL connected Homey to store on a Windows computer
 
