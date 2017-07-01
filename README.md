@@ -15,10 +15,15 @@ Using the import functions incorrectly can cause serious, system-wide problems t
 
 ##Version History:
 * 0.0.8 (20170701)
+
   Various fixes
+
 * Previous Updates
+
   Added new exports for Homey v1.1.x firmware
+
   Added new commandlets Get-HomeyStatistics, Get-HomeyTokens  
+  
   Online Version History https://github.com/Dijker/nu.dijker.HomeyPSCLI/wiki/Release-Notes
 
 ## To Do
