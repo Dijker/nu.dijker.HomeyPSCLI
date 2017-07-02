@@ -1,7 +1,7 @@
 ﻿<#
 .Synopsis
    HomeyPSCLI Module (Homey by Athom http://www.athom.com)
-   Beta 0.0.10 20170701
+   Beta 0.0.11 20170702
    - Various updates
 .DESCRIPTION
    Set IP Address and Bearer for your LOCAL Homey to store in a PowerShell variable Windows computer
@@ -18,7 +18,7 @@ function Connect-Homey
 <#
 .Synopsis
    Connect-Homey
-   Beta 0.0.10
+   Beta 0.0.11
 .DESCRIPTION
    Set IP Address or HostName and Bearer for your LOCAL Homey to store in a PowerShell variable on your Windows computer
    Optional set Export Path for exports of JSON Config files to your disk
@@ -160,6 +160,7 @@ function Connect-Homey
         If ($_HomeysMyAppVersionVal -gt $_CurrentMyAppVersionVal ) {
             Write-Host "New HomeyPSCLI version available on Homey!" -ForegroundColor Green
 
+			# Alternate location ! https://raw.githubusercontent.com/Dijker/nu.dijker.HomeyPSCLI/master/settings/HomeyPSCLI/HomeyPSCLI.psm1
             Write-Host ".... Downloading upgrade ...." -ForegroundColor Green
 
 
@@ -724,7 +725,7 @@ function Export-HomeyConfig
 <#
 .Synopsis
    Get Export config from Homey (by Athom http://www.athom.com)
-   Beta 0.0.10
+   Beta 0.0.11
 .DESCRIPTION
    Get Export information from your LOCAL connected Homey to store on a Windows computer
 
@@ -905,42 +906,42 @@ function Export-HomeyConfig
 
     @('media/playlist') | ForEach-Object {
         $_ExportPathAppsVar =  "$_HomeysExportPath\Media"
-        If (!(Test-Path $_ExportPathAppsVar)) { $return = New-Item $_ExportPathAppsVar -ItemType Directory } 
+        If (!(Test-Path $_ExportPathAppsVar)) { $return = New-Item $_ExportPathAppsVar -ItemType Directory }
         $return = Export-HomeySystemSettings -AppUri $_
         $_Filename = Get-ValidFilename $_
-        # $return  | ConvertTo-Json -depth 99 | Out-File -FilePath "$_ExportPathAppsVar\Vars-$_Filename-v$_HomeyVersion-$_ExportDTSt.json" 
+        # $return  | ConvertTo-Json -depth 99 | Out-File -FilePath "$_ExportPathAppsVar\Vars-$_Filename-v$_HomeyVersion-$_ExportDTSt.json"
 
         # Write Only Incremental files
         $_LastFile = Get-ChildItem "$_ExportPathAppsVar\PlayLists-$_hostname-$_Filename-v*.json"  -Filter  *.json -File -ErrorAction SilentlyContinue | sort -Descending -property LastWriteTime
-        If ($_LastFile -ne $null) { 
+        If ($_LastFile -ne $null) {
             $_NewJSON = $return  | ConvertTo-Json -depth 99 | Out-String
             $_LastJSONFile = Get-Content -Raw $_LastFile[0]
             If ($_NewJSON -eq $_LastJSONFile) {$_WriteJSON = $false} else {$_WriteJSON = $true}
-        } else { $_WriteJSON = $true } 
-        If ($_WriteJSON -eq $true ) { 
-            Write-Verbose "Writing PlayList - $_Filename" 
-            $return  | ConvertTo-Json -depth 99 | Out-File -FilePath "$_ExportPathAppsVar\PlayLists-$_hostname-$_Filename-v$_HomeyVersion-$_ExportDTSt.json" 
-        }  
-        $_PlayLists = $return        
+        } else { $_WriteJSON = $true }
+        If ($_WriteJSON -eq $true ) {
+            Write-Verbose "Writing PlayList - $_Filename"
+            $return  | ConvertTo-Json -depth 99 | Out-File -FilePath "$_ExportPathAppsVar\PlayLists-$_hostname-$_Filename-v$_HomeyVersion-$_ExportDTSt.json"
+        }
+        $_PlayLists = $return
     }
     $_PlayLists | ForEach-Object {
         $_ExportPathAppsVar =  "$_HomeysExportPath\Media\PlayLists"
-        If (!(Test-Path $_ExportPathAppsVar)) { $return = New-Item $_ExportPathAppsVar -ItemType Directory } 
+        If (!(Test-Path $_ExportPathAppsVar)) { $return = New-Item $_ExportPathAppsVar -ItemType Directory }
         $return = Export-HomeySystemSettings -AppUri "media/playlist/"+ $_.id
         $_Filename1 = $_.title+" - "+$_.id
         $_Filename = Get-ValidFilename $_Filename1
-        # $return  | ConvertTo-Json -depth 99 | Out-File -FilePath "$_ExportPathAppsVar\Vars-$_Filename-v$_HomeyVersion-$_ExportDTSt.json" 
+        # $return  | ConvertTo-Json -depth 99 | Out-File -FilePath "$_ExportPathAppsVar\Vars-$_Filename-v$_HomeyVersion-$_ExportDTSt.json"
 
         # Write Only Incremental files
         $_LastFile = Get-ChildItem "$_ExportPathAppsVar\PlayList-$_hostname-$_Filename-v*.json"  -Filter  *.json -File -ErrorAction SilentlyContinue | sort -Descending -property LastWriteTime
-        If ($_LastFile -ne $null) { 
+        If ($_LastFile -ne $null) {
             $_NewJSON = $return  | ConvertTo-Json -depth 99 | Out-String
             $_LastJSONFile = Get-Content -Raw $_LastFile[0]
             If ($_NewJSON -eq $_LastJSONFile) {$_WriteJSON = $false} else {$_WriteJSON = $true}
-        } else { $_WriteJSON = $true } 
-        If ($_WriteJSON -eq $true ) { 
-            Write-Verbose "Writing PlayList - $_Filename" 
-            $return  | ConvertTo-Json -depth 99 | Out-File -FilePath "$_ExportPathAppsVar\PlayList-$_hostname-$_Filename-v$_HomeyVersion-$_ExportDTSt.json" 
+        } else { $_WriteJSON = $true }
+        If ($_WriteJSON -eq $true ) {
+            Write-Verbose "Writing PlayList - $_Filename"
+            $return  | ConvertTo-Json -depth 99 | Out-File -FilePath "$_ExportPathAppsVar\PlayList-$_hostname-$_Filename-v$_HomeyVersion-$_ExportDTSt.json"
         }
     }
 
