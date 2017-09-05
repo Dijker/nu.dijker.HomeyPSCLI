@@ -1,6 +1,10 @@
 "use strict";
 
-function init() {
-//	Homey.log("Hello PowerShell!!");
+const Homey = require('homey');
+
+class homeyPSCLI extends Homey.App {
+	onInit() {
+		this.log('init homeyPSCLI')
+	}
 }
-module.exports.init = init;
+module.exports = homeyPSCLI;

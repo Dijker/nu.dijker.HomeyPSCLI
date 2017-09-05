@@ -1,12 +1,13 @@
 {
     "id": "nu.dijker.homeypscli",
+    "sdk": 2,
     "name": {
         "en": "PowerShell CLI for Homey",
         "nl": "PowerShell CLI voor Homey"
     },
-    "version": "0.0.11",
-    "compatibility": "1.x",
-	"description": {
+    "version": "0.1.1",
+    "compatibility": "1.x >=1.5.0",
+  	"description": {
 		"en": "Control your Homey from PowerShell on a Windows PC",
 		"nl": "Bestuur je Homey vanuit PowerShell op een Windows PC"
 	},

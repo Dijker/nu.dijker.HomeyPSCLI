@@ -71,7 +71,8 @@ I am a professional, I like my browser and I know what I do:
 <br>
         <script type="text/javascript">
         function onHomeyReady(){
-            Homey.ready()
+            Homey = homeyReady;
+            Homey.ready();
         }
         function SetCookie(c_name,value,expiredays) {
           var exdate=new Date()
