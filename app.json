@@ -16,16 +16,17 @@
         "email": "Homey.Apps@dijker.nu",
 		"website": "http://www.dijker.nu"
     },
-	"contributing": {
-        "donate": {
-            "paypal": {
-                "email": "Geurt@Dijker.nu",
-                "currency": "EUR"
-            }
-        },
-	"category": "tools",
-	"images": {
-		"large": "assets/images/large.png",
-		"small": "assets/images/small.png"
-	}
+    "contributing": {
+       "donate": {
+          "paypal": {
+             "email": "Geurt@Dijker.nu",
+             "currency": "EUR"
+           }
+        }
+    },
+    "category": "tools",
+    "images": {
+       "large": "assets/images/large.png",
+       "small": "assets/images/small.png"
+    }
 }
