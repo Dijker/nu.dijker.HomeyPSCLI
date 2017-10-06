@@ -2,6 +2,8 @@
 <link rel="stylesheet" href="/manager/webserver/assets/font/fontawesome/fontawesome.css">
 <html>
     <head>
+      <script type="text/javascript" src="/homey.js" data-origin="settings"></script>
+      <script type="text/javascript" src="settings.js" data-origin="settings"></script>
     </head>
 <body>
 <h1>PowerShell CLI for Homey</h1>
@@ -41,7 +43,7 @@ actions    {}
 PS&gt; Remove-HomeyFlow  -ID  "a13f6703-a770-4620-8c93-4ea7e824b6b5"
 
 </pre><h2>Warning: </h2>This scripts make it possible to import some of the exported information, fe flows and BetterLogic variables. Possibly you break something in Homey when you import across different Homeys,&nbsp;different&nbsp;firmware versions or after importing edited information.&nbsp;<br><br>Using the import functions incorrectly can cause serious, system-wide problems that may require you to factory reset your Homey, restore firmware or even buy a new Homey to correct them.&nbsp;The Creator of the App and Athom&nbsp;cannot guarantee that any problems resulting from the use of these scripts can be solved. Use this tool at your own risk.<br><br>The Creator of the App and Athom are not responsible!!<br>
-<br><br><h2>FAQ:</h2><ol><li>Q: What does this App do? A: Nothing (yet)! It shows this Page to tel you How to user HomeyPSCLI / PowerShell end provides the downloads of the two files.</li><li>Q: So I download the psm1/psd1 files from Github and follow this instructions, will that work? A: Yes that should work!&nbsp;</li><li>Q: Why should I install this app? A: I like to inform you in the notification center to update you scripts next time I update the app. Maybe the next version &nbsp;will support auto updating so you only have to update the scripts yourself once...</li><li>Q: I have an other question.....&nbsp;:smiley:&nbsp; &nbsp;A: See you on the&nbsp;<a rel="nofollow" target="_blank" href="https://forum.athom.com/discussion/2086">Athom Forum HomeyPSCLI tread</a><br>&nbsp;<br></li><li>Q: I have found a bug / a feature request! &nbsp;A: See you on GitHub <a rel="nofollow" target="_blank" href="https://github.com/Dijker/nu.dijker.HomeyPSCLI/issues">HomeyPSCLI Issues</a><br>&nbsp;</li></ol><h2>Version History:</h2>0.0.10 (20170701)<br><a rel="nofollow" target="_blank" href="https://github.com/Dijker/nu.dijker.HomeyPSCLI/wiki/Release-Notes">Online Version History</a><br>
+<br><br><h2>FAQ:</h2><ol><li>Q: What does this App do? A: Nothing (yet)! It shows this Page to tel you How to user HomeyPSCLI / PowerShell end provides the downloads of the two files.</li><li>Q: So I download the psm1/psd1 files from Github and follow this instructions, will that work? A: Yes that should work!&nbsp;</li><li>Q: Why should I install this app? A: I like to inform you in the notification center to update you scripts next time I update the app. Maybe the next version &nbsp;will support auto updating so you only have to update the scripts yourself once...</li><li>Q: I have an other question.....&nbsp;:smiley:&nbsp; &nbsp;A: See you on the&nbsp;<a rel="nofollow" target="_blank" href="https://forum.athom.com/discussion/2086">Athom Forum HomeyPSCLI tread</a><br>&nbsp;<br></li><li>Q: I have found a bug / a feature request! &nbsp;A: See you on GitHub <a rel="nofollow" target="_blank" href="https://github.com/Dijker/nu.dijker.HomeyPSCLI/issues">HomeyPSCLI Issues</a><br>&nbsp;</li></ol><h2>Version History:</h2>0.1.3 (20171006)<br><a rel="nofollow" target="_blank" href="https://github.com/Dijker/nu.dijker.HomeyPSCLI/wiki/Release-Notes">Online Version History</a><br>
 
 <a name="EasyInstall"></a>
 <H2>Easy Module Installation:</H2>
@@ -69,18 +71,5 @@ it should look like: <pre class="CodeBlock">...WindowsPowerShell\Modules\HomeyPS
 I am a professional, I like my browser and I know what I do:
       <a href="javascript:window.location.reload(true)" onClick="SetCookie('homey_suppressbrowserwarning','1',999)"><button type="button" name="accept" class="btn btn-success">Give me the Cookie - OM NOM NOM</button>
 <br>
-        <script type="text/javascript">
-        function onHomeyReady(){
-            Homey = homeyReady;
-            Homey.ready();
-        }
-        function SetCookie(c_name,value,expiredays) {
-          var exdate=new Date()
-          exdate.setDate(exdate.getDate()+expiredays)
-          document.cookie=c_name+ "=" +escape(value)+
-          ((expiredays==null) ? "" : ";expires="+exdate.toGMTString())+"; path=/"
-          location.reload()
-        }
-        </script>
-    </body>
+</body>
 </html>

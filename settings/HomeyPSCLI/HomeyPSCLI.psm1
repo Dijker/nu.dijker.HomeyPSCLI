@@ -1,7 +1,7 @@
 ﻿<#
 .Synopsis
    HomeyPSCLI Module (Homey by Athom http://www.athom.com)
-   Beta 0.0.11 20170702
+   Beta 0.1.3.0 20171006
    - Various updates
 .DESCRIPTION
    Set IP Address and Bearer for your LOCAL Homey to store in a PowerShell variable Windows computer
@@ -18,7 +18,7 @@ function Connect-Homey
 <#
 .Synopsis
    Connect-Homey
-   Beta 0.0.11
+   Beta 0.1.3.0
 .DESCRIPTION
    Set IP Address or HostName and Bearer for your LOCAL Homey to store in a PowerShell variable on your Windows computer
    Optional set Export Path for exports of JSON Config files to your disk
@@ -166,7 +166,7 @@ function Connect-Homey
 
             # "{0:yyyyMMddHHmmss}" -f (Get-ChildItem C:\Users\gdi.PQRNL\Documents\WindowsPowerShell\Modules\HomeyPSCLI\HomeyPSCLIn.psd1 ).LastWriteTime
             ('HomeyPSCLI.psd1','HomeyPSCLI.psm1' ) | ForEach-Object  {"$_"
-                iF ( Test-Path "$ScriptDirectory\$_" ) {
+                if ( Test-Path "$ScriptDirectory\$_" ) {
                     $_LastWriteTime = "{0:yyyyMMddHHmmss}" -f (Get-ChildItem "$ScriptDirectory\$_" ).LastWriteTime
                     Rename-Item -Path "$ScriptDirectory\$_" "$_-$_LastWriteTime"
                 }
@@ -185,6 +185,8 @@ function Connect-Homey
         "`$Global:_HomeysExportPath = ""$_HomeysExportPath""" | Out-File -FilePath $ScriptDirectory\Config-HomeyPSCLI.ps1 -Append
         "`$Global:_HomeysIP = ""$_HomeysIP""" | Out-File -FilePath $ScriptDirectory\Config-HomeyPSCLI.ps1 -Append
     }
+    $return = Set-HomeyApps -AppUri  "nu.dijker.homeypscli" -Enabled:$false
+    Write-Host "To safe on memory HomeyPSCLI app on Homey disabled" -ForegroundColor green
 }
 
 
@@ -226,6 +228,35 @@ function Export-HomeySystemSettings
     # $Global:_HomeyVersion = $_AppWR.Headers.'X-Homey-Version'
     return $_AppJSON.result
 }
+
+function Get-HomeyApps
+{
+    # param (
+    # [string] $AppUri )
+    Write-Verbose "function Export-HomeyApps"
+
+    $return = Export-HomeySystemSettings -AppUri 'apps/app'
+    return $return.Values
+}
+
+function Set-HomeyApps
+{
+    param (
+    [string] $AppUri,
+    [switch] $Enabled
+    )
+    Write-Verbose "function Set-HomeyApps"
+    if ($Enabled) {
+        $CompressedJSONVarValue = "{""enabled"":true}"
+    } else {
+        $CompressedJSONVarValue = "{""enabled"":false}"
+    }
+    $_uri = "$_HomeysProtocol`://$_HomeysConnectHost/api/manager/apps/app/$AppUri"
+    $_FlowWR = Invoke-WebRequest -Uri "$_uri" -Headers $_HomeysHeaders  -ContentType $_HomeysContentType -Method Put -Body $CompressedJSONVarValue
+
+    return $_FlowWR.content
+}
+
 
 function Import-HomeyAppsVar
 {
@@ -725,7 +756,7 @@ function Export-HomeyConfig
 <#
 .Synopsis
    Get Export config from Homey (by Athom http://www.athom.com)
-   Beta 0.0.11
+   Beta 0.1.3.0
 .DESCRIPTION
    Get Export information from your LOCAL connected Homey to store on a Windows computer
 

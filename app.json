@@ -1,32 +1,31 @@
 {
-    "id": "nu.dijker.homeypscli",
-    "sdk": 2,
-    "name": {
-        "en": "PowerShell CLI for Homey",
-        "nl": "PowerShell CLI voor Homey"
-    },
-    "version": "0.1.2",
-    "compatibility": "1.x >=1.5.0",
-  	"description": {
-		"en": "Control your Homey from PowerShell on a Windows PC",
-		"nl": "Bestuur je Homey vanuit PowerShell op een Windows PC"
-	},
-    "author": {
-        "name": "Geurt Dijker",
-        "email": "Homey.Apps@dijker.nu",
-		"website": "http://www.dijker.nu"
-    },
-    "contributing": {
-       "donate": {
-          "paypal": {
-             "email": "Geurt@Dijker.nu",
-             "currency": "EUR"
-           }
-        }
-    },
-    "category": "tools",
-    "images": {
-       "large": "assets/images/large.png",
-       "small": "assets/images/small.png"
-    }
+   "id":"nu.dijker.homeypscli",
+   "sdk":2,
+   "name":{
+      "en":"PowerShell CLI for Homey",
+      "nl":"PowerShell CLI voor Homey"
+   },
+   "version":"0.1.3",
+   "compatibility":"1.x >=1.5.0",
+   "description":{
+      "en":"Control your Homey from PowerShell on a Windows PC",
+      "nl":"Bestuur je Homey vanuit PowerShell op een Windows PC"
+   },
+   "author":{
+      "name":"Geurt Dijker",
+      "email":"Geurt@dijker.nu"
+   },
+   "contributing":{
+      "donate":{
+         "paypal":{
+            "email":"Geurt@Dijker.nu",
+            "currency":"EUR"
+         }
+      }
+   },
+   "category":"tools",
+   "images":{
+      "large":"assets/images/large.png",
+      "small":"assets/images/small.png"
+   }
 }
