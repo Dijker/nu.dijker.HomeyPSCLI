@@ -5,7 +5,7 @@
       "en":"PowerShell CLI for Homey",
       "nl":"PowerShell CLI voor Homey"
    },
-   "version":"0.1.4",
+   "version":"0.1.5",
    "compatibility":"1.x >=1.5.0",
    "description":{
       "en":"Control your Homey from PowerShell on a Windows PC",
@@ -24,6 +24,7 @@
    "bugs": {
        "url": "https://github.com/Dijker/nu.dijker.HomeyPSCLI/issues"
    },
+   "athomForumDiscussionId": 2086,
    "category":"tools",
    "images":{
       "large":"assets/images/large.png",
