@@ -5,7 +5,7 @@ Download the Powershell Module files from your Homey to manage Homey from your W
 
 Appstore info in the APPSTORE.md View here: https://apps.athom.com/app/nu.dijker.homeypscli
 
-For more information and examples view the Settings page after installing, go to the forum (*Link to be inserted*) and create Issues (bug reports, feature requests) on Github ( https://github.com/Dijker/nu.dijker.HomeyPSCLI/issues )  
+For more information and examples view the Settings page after installing, go to the forum and create Issues (bug reports, feature requests) on Github ( https://github.com/Dijker/nu.dijker.HomeyPSCLI/issues )  
 
 ##Warning:
 
@@ -14,9 +14,10 @@ Using the import functions incorrectly can cause serious, system-wide problems t
 *The Creator of the App and Athom are not responsible!!*
 
 ##Version History:
-* 0.1.3 (20171006)
 
-  Various fixes
+* 0.1.7 (20180825) Updated forum Links
+
+* 0.1.3 (20171006) Various fixes
 
 * Previous Updates
 
