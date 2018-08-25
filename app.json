@@ -5,8 +5,9 @@
       "en":"PowerShell CLI for Homey",
       "nl":"PowerShell CLI voor Homey"
    },
-   "version":"0.1.6",
+   "version":"0.1.7",
    "compatibility":"1.x >=1.5.0",
+   "homeyCommunityTopicId" : 311,
    "description":{
       "en":"Control your Homey from PowerShell on a Windows PC",
       "nl":"Bestuur je Homey vanuit PowerShell op een Windows PC"
