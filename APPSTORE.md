@@ -41,9 +41,9 @@ Using the import functions incorrectly can cause serious, system-wide problems t
 *The Creator of the App and Athom are not responsible!!*
 
 ##Version History:
-* 0.1.3 (20171006)
 
-  Various fixes and SDK2
+* 0.1.7 (20180825) Updated forum Links
+* 0.1.3 (20171006) Various fixes and SDK2
 
 * Previous Updates
 
