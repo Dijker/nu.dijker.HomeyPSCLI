@@ -1,6 +1,7 @@
 {
    "id":"nu.dijker.homeypscli",
    "sdk":2,
+   "brandColor": "#012456",
    "name":{
       "en":"PowerShell CLI for Homey",
       "nl":"PowerShell CLI voor Homey"
